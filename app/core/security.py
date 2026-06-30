@@ -2,20 +2,14 @@
 import firebase_admin
 from firebase_admin import auth
 from firebase_admin import credentials
-from config import settings
+from app.core.config import settings
 from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 bearer_schema=HTTPBearer()
 
 
-firebase_creds=credentials.Certificate({
-    "type":"service_account",
-    "project_id": settings.GOOGLE_PROJECT_ID,
-    "private_key": settings.GOOGLE_PRIVATE_KEY.replace("\\n", "\n"),
-    "client_email": settings.GOOGLE_CLIENT_EMAIL,
-    "token_uri": settings.TOKEN_URL,
-})
+firebase_creds=credentials.Certificate("./acckey.json")
 
 default_app = firebase_admin.initialize_app(firebase_creds)
 

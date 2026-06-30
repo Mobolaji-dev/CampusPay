@@ -7,6 +7,11 @@ class Settings(BaseSettings):
     NOMBA_BASE_URL:str
     DATABASE_URL:str
     SECRET_KEY:str
+    GOOGLE_PROJECT_ID: str
+    GOOGLE_CLIENT_EMAIL:str
+    GOOGLE_PRIVATE_KEY:str
+    FIREBASE_CREDENTIALS_PATH:str
+    TOKEN_URL:str
 
     class Config:
         env_file= ".env"
