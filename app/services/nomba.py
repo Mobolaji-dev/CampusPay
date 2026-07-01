@@ -73,5 +73,19 @@ async def get_valid_token() -> str:
     _token_expires_at = datetime.now(timezone.utc) + timedelta(minutes=25)
     return _cached_access_token
     
-
-
+async def nomba_api_request(method: str , endpoint: str, payload: dict | None = None) -> dict:
+    access_token = await get_valid_token()
+    async with httpx.AsyncClient() as client:
+        response = await client.request(
+            method=method,
+            url=f"{settings.NOMBA_BASE_URL}{endpoint}",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+                "accountId": settings.ACCOUNT_ID,
+            },
+            json=payload,
+        )
+        return response.json()
+    
+async def create_virtual_account()
