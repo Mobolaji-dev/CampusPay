@@ -1,6 +1,4 @@
-/* =========================================
-   CSS Reset & Base Styles
-   ========================================= */
+/* CSS Reset & Base Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -14,9 +12,7 @@ body {
     padding-bottom: 90px; /* Space for fixed bottom nav */
 }
 
-/* =========================================
-   Header 
-   ========================================= */
+/*  Header */
 .app-header {
     display: flex;
     justify-content: space-between;
@@ -41,9 +37,7 @@ body {
     cursor: pointer;
 }
 
-/* =========================================
-   Search Bar
-   ========================================= */
+/* Search Bar */
 .search-container {
     padding: 0 16px 16px;
     max-width: 1200px;
@@ -78,9 +72,7 @@ body {
     color: #5a5a5a;
 }
 
-/* =========================================
-   Category Filters (Scrollable)
-   ========================================= */
+/* Category Filters (Scrollable) */
 .category-filters {
     display: flex;
     gap: 12px;
@@ -114,9 +106,7 @@ body {
     border-color: #0052ff;
 }
 
-/* =========================================
-   Product Grid
-   ========================================= */
+/*  Product Grid */
 .product-grid {
     display: grid;
     grid-template-columns: 1fr; /* 1 column on mobile */
@@ -209,9 +199,7 @@ body {
     background-color: #0042cc;
 }
 
-/* =========================================
-   Load More Button
-   ========================================= */
+/* Load More Button */
 .load-more-container {
     display: flex;
     justify-content: center;
@@ -238,9 +226,7 @@ body {
     background-color: #f0f4ff;
 }
 
-/* =========================================
-   Bottom Navigation
-   ========================================= */
+/*  Bottom Navigation */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -274,9 +260,7 @@ body {
     color: #002db3;
 }
 
-/* =========================================
-   Desktop Responsiveness (Media Queries)
-   ========================================= */
+/* Desktop Responsiveness (Media Queries) */
 @media (min-width: 600px) {
     /* 2 columns for tablets */
     .product-grid {

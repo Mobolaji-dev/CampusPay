@@ -1,6 +1,4 @@
-/* =========================================
-   CSS Reset & Base Styles
-   ========================================= */
+/* CSS Reset & Base Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -15,9 +13,7 @@ body {
     padding-bottom: 120px; 
 }
 
-/* =========================================
-   Top Header
-   ========================================= */
+/* Top Header */
 .top-header {
     background-color: #fff;
     border-bottom: 1px solid #eaeaef;
@@ -55,9 +51,7 @@ body {
     width: 32px; /* Balances the back button width to center the title */
 }
 
-/* =========================================
-   Main Checkout Layout
-   ========================================= */
+/* Main Checkout Layout */
 .checkout-container {
     padding: 24px 16px;
     max-width: 600px; /* Narrower container for checkout forms */
@@ -96,9 +90,7 @@ body {
     margin-bottom: 12px;
 }
 
-/* =========================================
-   Order Summary Card
-   ========================================= */
+/* Order Summary Card */
 .summary-card {
     background: #fff;
     border-radius: 12px;
@@ -211,9 +203,7 @@ body {
     color: #0052ff; /* Vibrant CampusPay Blue */
 }
 
-/* =========================================
-   Security Verification Section
-   ========================================= */
+/* Security Verification Section */
 .security-instructions {
     font-size: 14px;
     color: #444;
@@ -257,9 +247,7 @@ body {
     text-decoration: underline;
 }
 
-/* =========================================
-   Bottom Action Bar
-   ========================================= */
+/* Bottom Action Bar */
 .bottom-action-bar {
     position: fixed;
     bottom: 0;
@@ -310,9 +298,7 @@ body {
     color: #777;
 }
 
-/* =========================================
-   Desktop Responsiveness 
-   ========================================= */
+/* Desktop Responsiveness  */
 @media (min-width: 650px) {
     /* For larger screens, add a subtle border/shadow to the main column */
     .checkout-container {

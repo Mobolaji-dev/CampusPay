@@ -1,6 +1,4 @@
-/* =========================================
-   Base Styles
-   ========================================= */
+/* Base Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -24,9 +22,7 @@ body {
     text-align: center;
 }
 
-/* =========================================
-   Header & Success Icon
-   ========================================= */
+/*  Header & Success Icon */
 .app-logo {
     font-size: 28px;
     color: #002db3;
@@ -55,9 +51,7 @@ body {
     padding: 0 20px;
 }
 
-/* =========================================
-   Receipt Card
-   ========================================= */
+/* Receipt Card */
 .receipt-card {
     background: #fff;
     width: 100%;
@@ -104,9 +98,7 @@ body {
     color: #111;
 }
 
-/* =========================================
-   Illustration & Buttons
-   ========================================= */
+/* Illustration & Buttons */
 .illustration {
     width: 100%;
     height: 120px;
