@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     GOOGLE_PRIVATE_KEY:str
     FIREBASE_CREDENTIALS_PATH:str
     TOKEN_URL:str
+    ACCOUNT_ID:str
+    WEBHOOK_SECRET:str
 
     class Config:
         env_file= ".env"

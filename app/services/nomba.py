@@ -122,6 +122,6 @@ async def transfer_to_bank(amount:Decimal,
             "bankCode": bank_code,
             "merchantTxRef":merchantTxRef,
             "senderName":sender_name,
-           "narration":narration,
+            "narration":narration,
     }
     )
