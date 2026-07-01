@@ -51,6 +51,7 @@ class users(Base):
     phone: Mapped[str] = mapped_column(String, unique=True)
     vendor_bank_account: Mapped[str | None ] = mapped_column(String, nullable=True)
     vendor_bank_code: Mapped[int | None] = mapped_column(String, nullable=True)
+    transaction_pin_hash: Mapped[str | None]=mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.now,
@@ -141,4 +142,21 @@ class orders(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.now,
+    )
+
+class products(Base):
+    __tablename__ = "product"
+
+    product_id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    vendor_id: Mapped[str] = mapped_column(
+        String, ForeignKey("users.user_id")
+    )
+    name: Mapped[str] = mapped_column(String)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    is_available: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now
     )
