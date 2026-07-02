@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CampusPay - Create Account</title>
-    <link rel="stylesheet" href="styles.css/signup.css">
+    <link rel="stylesheet" href="styles/signup.css">
 </head>
 <body>
     <div class="app-container">
@@ -22,15 +22,15 @@
             <h1 class="title">Create your account</h1>
             <p class="subtitle">Join us and get your virtual account provisioned instantly.</p>
 
-            <form class="signup-form">
+            <form id="signup-form" class="signup-form">
                 <div class="input-group">
                     <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" placeholder="Enter your full name">
+                    <input type="text" id="fullName" placeholder="Enter your full name" required>
                 </div>
 
                 <div class="input-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" placeholder="name@example.com">
+                    <input type="email" id="signup-email" placeholder="name@example.com" required>
                 </div>
 
                 <div class="input-group">
@@ -40,14 +40,14 @@
                             <span class="flag">🇳🇬</span>
                             <span class="code-text">+234</span>
                         </div>
-                        <input type="tel" id="phone" placeholder="801 234 5678">
+                        <input type="tel" id="phone" placeholder="801 234 5678" required>
                     </div>
                 </div>
 
                 <div class="input-group">
                     <label for="password">Password</label>
                     <div class="password-input-wrapper">
-                        <input type="password" id="password" placeholder="Min. 8 characters">
+                        <input type="password" id="signup-password" placeholder="Min. 8 characters" required>
                         <button type="button" class="toggle-password" aria-label="Show password">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -57,7 +57,10 @@
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">Create Account</button>
+                <button id="signup-btn" type="submit" class="btn signup-btn">
+                  <span class="btn-text">Create Account</span>
+                  <span class="spinner"></span>
+                </button>
             </form>
 
             <div class="security-badge">
@@ -72,5 +75,17 @@
             </p>
         </main>
     </div>
+
+    <div id="popup-error" class="popup-overlay">
+      <div class="popup-content">
+        <div class="popup-icon error-icon">&#9888;</div>
+        <h3 class="popup-title">SignUp Failed</h3>
+        <p class="popup-text" id="error-message">Ensure password is up to 8 characters</p>
+        
+      </div>
+    </div>  
+
+
+    <script type="module" src="scripts/auth.js" defer></script>
 </body>
 </html>
