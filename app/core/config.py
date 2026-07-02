@@ -4,6 +4,7 @@ class Settings(BaseSettings):
     NOMBA_CLIENT_ID:str
     NOMBA_PRIVATE_KEY:str
     NOMBA_ACCOUNT_ID:str
+    NOMBA_SUB_ACCOUNT_ID: str
     NOMBA_BASE_URL:str
     DATABASE_URL:str
     SECRET_KEY:str
@@ -12,8 +13,8 @@ class Settings(BaseSettings):
     GOOGLE_PRIVATE_KEY:str
     FIREBASE_CREDENTIALS_PATH:str
     TOKEN_URL:str
-    ACCOUNT_ID:str
     WEBHOOK_SECRET:str
+    
 
     class Config:
         env_file= ".env"
