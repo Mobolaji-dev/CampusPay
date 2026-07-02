@@ -9,7 +9,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from decimal import Decimal
-from core.database import Base
+from app.core.database import Base
 from enum import Enum
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import Enum as SAEnum
@@ -65,7 +65,7 @@ class accounts(Base):
     dva_id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda:str(uuid.uuid4()))
     student_id: Mapped[str] = mapped_column(
         String,
-        ForeignKey("users.user_id"),
+        ForeignKey("user.user_id"),
     )
     account_reference: Mapped[str] = mapped_column(Text, unique=True)
     bank_account_number: Mapped[str] = mapped_column(Text)
@@ -84,7 +84,7 @@ class wallets(Base):
     wallet_id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda:str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(
         String,
-        ForeignKey("users.user_id"),
+        ForeignKey("user.user_id"),
         unique=True,
     )
     available_balance: Mapped[Decimal] = mapped_column(Numeric(12, 2))
@@ -119,11 +119,11 @@ class orders(Base):
     order_id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda:str(uuid.uuid4()))
     student_id: Mapped[str] = mapped_column(
         String,
-        ForeignKey("users.user_id"),
+        ForeignKey("user.user_id"),
     )
     vendor_id: Mapped[str] = mapped_column(
         String,
-        ForeignKey("users.user_id"),
+        ForeignKey("user.user_id"),
     )
     item_description: Mapped[str] = mapped_column(Text)
     item_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
@@ -151,7 +151,7 @@ class products(Base):
         String, primary_key=True, default=lambda: str(uuid.uuid4())
     )
     vendor_id: Mapped[str] = mapped_column(
-        String, ForeignKey("users.user_id")
+        String, ForeignKey("user.user_id")
     )
     name: Mapped[str] = mapped_column(String)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
