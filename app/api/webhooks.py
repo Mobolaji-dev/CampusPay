@@ -23,7 +23,7 @@ async def nomba_webhook(request:Request, db:AsyncSession=Depends(get_db)):
         if not signature or not timestamp:
             raise HTTPException(status_code=400, detail="Missing signature or timestamp")
         
-        is_valid=verify_nomba_signature(raw_body.decode(),timestamp,signature)
+        is_valid=verify_nomba_signature(raw_body.decode(),signature, timestamp)
         if not is_valid:
             raise HTTPException(status_code=400, detail="Invalid signature")
         
