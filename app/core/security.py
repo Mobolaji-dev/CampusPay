@@ -5,11 +5,17 @@ from firebase_admin import credentials
 from app.core.config import settings
 from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import os
+import json
+import base64
+import tempfile
 
 bearer_schema=HTTPBearer()
 
 
-firebase_creds=credentials.Certificate("./acckey.json")
+creds_json = base64.b64decode(os.environ["FIREBASE_CREDENTIALS_BASE64"])
+creds_dict = json.loads(creds_json)
+firebase_creds = credentials.Certificate(creds_dict)
 
 default_app = firebase_admin.initialize_app(firebase_creds)
 
