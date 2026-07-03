@@ -62,6 +62,8 @@ if (loginForm) {
       localStorage.setItem('token', token);
       localStorage.setItem('uid', user.uid);
       loginbtn.classList.remove('loading');
+
+      window.location.href = "dashboard.html"
     }
       catch(err) {
       console.error("Error signing in:", err.code, err.message);
@@ -108,6 +110,8 @@ if (signupForm) {
           fullname: fullname,
         })
       });
+
+      window.location.href = "dashboard.html"
       
     } 
       catch(err) {
