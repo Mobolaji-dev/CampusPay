@@ -7,7 +7,8 @@ from sqlalchemy import select
 from app.core.security_webhook import verify_nomba_signature
 from app.models.models import webhook_events, accounts, wallets, hookstate
 from fastapi.responses import JSONResponse
-
+from decimal import Decimal
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ async def nomba_webhook(request:Request, db:AsyncSession=Depends(get_db)):
         
         is_valid=verify_nomba_signature(raw_body.decode(),signature, timestamp)
         if not is_valid:
-            raise HTTPException(status_code=400, detail="Invalid signature")
+            raise HTTPException(status_code=401, detail="Invalid signature")
         
         payload=json.loads(raw_body.decode())
         event_id=payload.get("requestId", "")
@@ -65,26 +66,25 @@ async def nomba_webhook(request:Request, db:AsyncSession=Depends(get_db)):
             logger.warning(f"No wallet found for student:{dva.student_id}")
             return JSONResponse(content={"message": "Wallet not found"}, status_code=200)
 
-        wallet.available_balance += amount
-
-        db.add(
-            webhook_events(
+        
+        new_event = webhook_events(
                 event_id=event_id,
                 event_type=event_type,
                 account_reference=account_reference,
-                amount=amount,
+                amount=Decimal(str(amount)),
                 status=hookstate.processed,
                 raw_payload=payload,
-            )
         )
+        db.add(new_event)
+        wallet.available_balance += Decimal(str(amount))
+        wallet.updated_at = datetime.now(timezone.utc)
         await db.commit()
-
-        return{"message":"Webhook received successfully"}
+        logger.info(f"Wallet credited: student={dva.student_id}, amount={amount}, ref={event_id}")
+        return JSONResponse(content={"message":"Webhook processed"}, status_code=200)
             
     except HTTPException:
         raise
     except Exception as e:
-        await db.rollback()
         logger.error(f"Error processing webhook: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
         
