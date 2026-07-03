@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/wallet`, {
+    let res = await fetch(`${API_BASE_URL}/api/wallet`, {
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
@@ -23,6 +23,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (res.status === 401) {
       window.location.href = "index.html";
       return;
+    }
+
+    // Self-healing: if the user exists in Firebase but has not been created in the database yet
+    if (res.status === 404) {
+      console.log("User/wallet not found in DB (404). Attempting self-healing sync...");
+      const syncRes = await fetch(`${API_BASE_URL}/auth/sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          role: 'student'
+        })
+      });
+
+      if (syncRes.ok) {
+        console.log("Auth sync successful. Retrying wallet fetch...");
+        res = await fetch(`${API_BASE_URL}/api/wallet`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+      }
     }
 
     if (!res.ok) throw new Error("Failed to load wallet");
