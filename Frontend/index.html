@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusPay - Create Account</title>
-    <link rel="stylesheet" href="styles/signup.css">
+    <title>CampusPay - Log In</title>
+    <link rel="stylesheet" href="styles/login.css">
 </head>
 <body>
     <div class="app-container">
@@ -16,38 +16,23 @@
                 </svg>
             </button>
             <div class="logo">CampusPay</div>
-            <div class="header-spacer"></div> </header>
+            <div class="header-spacer"></div>
+        </header>
 
-        <main class="main-content">
-            <h1 class="title">Create your account</h1>
-            <p class="subtitle">Join us and get your virtual account provisioned instantly.</p>
+        <div class="main-content">
+            <h1 class="title">Welcome back</h1>
+            <p class="subtitle">Sign in to manage your campus payments and track your student spending effortlessly.</p>
 
-            <form id="signup-form" class="signup-form">
-                <div class="input-group">
-                    <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" placeholder="Enter your full name" required>
-                </div>
-
+            <form id="login-form" class="login-form">
                 <div class="input-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="signup-email" placeholder="name@example.com" required>
-                </div>
-
-                <div class="input-group">
-                    <label for="phone">Phone Number</label>
-                    <div class="phone-input-wrapper">
-                        <div class="country-code">
-                            <span class="flag">🇳🇬</span>
-                            <span class="code-text">+234</span>
-                        </div>
-                        <input type="tel" id="phone" placeholder="801 234 5678" required>
-                    </div>
+                    <input type="email" id="login-email" placeholder="e.g. alex.smith@campus.edu" required>
                 </div>
 
                 <div class="input-group">
                     <label for="password">Password</label>
                     <div class="password-input-wrapper">
-                        <input type="password" id="signup-password" placeholder="Min. 8 characters" required>
+                        <input type="password" id="login-password" placeholder="........" required>
                         <button type="button" class="toggle-password" aria-label="Show password">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -55,37 +40,35 @@
                             </svg>
                         </button>
                     </div>
+                    <a href="#" class="forgot-password">Forgot password?</a>
                 </div>
 
-                <button id="signup-btn" type="submit" class="btn signup-btn">
-                  <span class="btn-text">Create Account</span>
+
+                <button type="submit" class="btn submit-btn" id="login-btn">
+                  <span class="btn-text">Log In</span>
                   <span class="spinner"></span>
                 </button>
             </form>
 
-            <div class="security-badge">
-                <svg width="60" height="70" viewBox="0 0 24 24" fill="none" stroke="#E2E8F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    <circle cx="12" cy="11" r="3"></circle>
-                </svg>
-            </div>
 
-            <p class="login-prompt">
-                Already have an account? <a href="login.html">Log in.</a>
-            </p>
+            <div id="popup-error" class="popup-overlay">
+              <div class="popup-content">
+                <div class="popup-icon error-icon">&#9888;</div>
+                  <h3 class="popup-title">Login Failed</h3>
+                  <p class="popup-text" id="error-message">Invalid email or password. Please try again.</p>
+                </div>
+              </div>
+            </div>  
+
+            <div class="signup-prompt-container">
+                <p class="signup-prompt">
+                    Don't have an account? <a href="signup.html">Sign up.</a>
+                </p>
+            </div>
         </main>
     </div>
 
-    <div id="popup-error" class="popup-overlay">
-      <div class="popup-content">
-        <div class="popup-icon error-icon">&#9888;</div>
-        <h3 class="popup-title">SignUp Failed</h3>
-        <p class="popup-text" id="error-message">Ensure password is up to 8 characters</p>
-        
-      </div>
-    </div>  
-
-
-    <script type="module" src="scripts/auth.js" defer></script>
+    <script src="scripts/index.js"></script>
+    <script type="module" src="scripts/auth.js" ></script>
 </body>
 </html>
