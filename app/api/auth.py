@@ -18,11 +18,12 @@ async def sync_user(
 ):
     try:
         body = await request.json()
+        full_name = body.get("full_name") or firebase_user.get("name") or "CampusPay User"
         result = await get_or_create_user(
             db=db,
             firebase_uid=firebase_user.get("uid"),
             email=firebase_user.get("email"),
-            full_name=body.get("full_name"),
+            full_name=full_name,
             role_str=body.get("role", "student"),
         )
         return JSONResponse(content=result, status_code=200)

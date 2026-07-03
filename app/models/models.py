@@ -51,7 +51,7 @@ class users(Base):
     role: Mapped[approles] = mapped_column(SAEnum(approles))
     full_name: Mapped[str] = mapped_column(String)
     email: Mapped[str] = mapped_column(String, unique=True)
-    phone: Mapped[str] = mapped_column(String, unique=True)
+    phone: Mapped[str | None] = mapped_column(String, unique=True)
     vendor_bank_account: Mapped[str | None ] = mapped_column(String, nullable=True)
     vendor_bank_code: Mapped[int | None] = mapped_column(String, nullable=True)
     transaction_pin_hash: Mapped[str | None]=mapped_column(String, nullable=True)

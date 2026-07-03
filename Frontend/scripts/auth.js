@@ -42,6 +42,38 @@ export function getUid() {
 
 
 
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8000'
+  : 'https://campuspay-web.vercel.app';
+
+async function syncWithBackend(token, uid, fullName = null, role = 'student') {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        full_name: fullName,
+        role: role
+      })
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Sync failed: ${errText}`);
+    }
+    const data = await response.json();
+    console.log('Backend sync successful:', data);
+    localStorage.setItem('role', data.role);
+    localStorage.setItem('fullName', data.full_name);
+    return data;
+  } catch (error) {
+    console.error('Backend sync error:', error);
+    throw error;
+  }
+}
+
 if (loginForm) {
   loginForm.addEventListener("submit", async(e) => {
     e.preventDefault();
@@ -56,11 +88,14 @@ if (loginForm) {
       const user = userCredential.user;
       const token = await user.getIdToken(true);
 
-
       console.log("User signed in:", user);
       localStorage.setItem('token', token);
       localStorage.setItem('uid', user.uid);
+
+      await syncWithBackend(token, user.uid, null, 'student');
+
       loginbtn.classList.remove('loading');
+      window.location.href = "dashboard.html";
     }
       catch(err) {
       console.error("Error signing in:", err.code, err.message);
@@ -74,12 +109,11 @@ if (loginForm) {
     
 };
 
-
-
 if (signupForm) {
   signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const fullName = document.getElementById("fullName").value;
     const email = signupForm["signup-email"].value;
     const password = signupForm["signup-password"].value; 
 
@@ -90,11 +124,15 @@ if (signupForm) {
       // Signed up
       
       const user = userCredential.user;
+      const token = await user.getIdToken(true);
       console.log("User signed up:", user);
       localStorage.setItem('token', token);
       localStorage.setItem('uid', user.uid);
-      loginbtn.classList.remove('loading');
-      
+
+      await syncWithBackend(token, user.uid, fullName, 'student');
+
+      signupbtn.classList.remove('loading');
+      window.location.href = "dashboard.html";
     } 
       catch(err) {
       console.error("Error signing up:", err.code, err.message);
@@ -103,9 +141,7 @@ if (signupForm) {
       setTimeout(() => {
         error.classList.remove('show')
       }, 1500);
-
     };
   })
-      
 };
 
