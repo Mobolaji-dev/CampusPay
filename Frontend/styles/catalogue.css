@@ -236,7 +236,7 @@ body {
     display: flex;
     justify-content: space-around;
     padding: 12px 0;
-    border-top: 1px solid #e2e4eb;
+    border-top: 1px solid #eaebf0;
     z-index: 100;
 }
 
@@ -257,7 +257,7 @@ body {
 }
 
 .nav-item.active {
-    color: #002db3;
+    color: #0056ff;
 }
 
 /* Desktop Responsiveness (Media Queries) */
