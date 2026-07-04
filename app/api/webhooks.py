@@ -21,9 +21,10 @@ async def nomba_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         logger.info(f"RAW HEADERS: {dict(request.headers)}")
         logger.info(f"RAW BODY: {raw_body.decode()}")
 
-        signature = request.headers.get("nomba-signature", "")
-        timestamp = request.headers.get("nomba-timestamp", "")
+        signature = request.headers.get("nomba-signature") or request.headers.get("nomba-sig-value") or ""
+        timestamp = request.headers.get("nomba-timestamp") or ""
         if not signature or not timestamp:
+            logger.warning(f"Webhook request missing signature or timestamp. headers={dict(request.headers)}")
             raise HTTPException(status_code=400, detail="Missing signature or timestamp")
 
         is_valid = verify_nomba_signature(raw_body.decode(), signature, timestamp)
@@ -31,7 +32,7 @@ async def nomba_webhook(request: Request, db: AsyncSession = Depends(get_db)):
             raise HTTPException(status_code=401, detail="Invalid signature")
 
         payload = json.loads(raw_body.decode())
-        event_id = payload.get("requestId", "")
+        event_id = payload.get("requestId") or payload.get("request_id") or ""
         event_type = payload.get("event_type", "")
 
         if event_type != "payment_success":
@@ -45,8 +46,16 @@ async def nomba_webhook(request: Request, db: AsyncSession = Depends(get_db)):
             logger.info(f"Duplicate webhook ignored:{event_id}")
             return JSONResponse(content={"message": "Already processed"}, status_code=200)
 
-        account_reference = payload["data"]["transaction"]["aliasAccountReference"]
-        amount = payload["data"]["transaction"]["transactionAmount"]
+        try:
+            transaction_data = payload["data"]["transaction"]
+            account_reference = transaction_data["aliasAccountReference"]
+            amount = transaction_data["transactionAmount"]
+        except KeyError as e:
+            logger.error(f"Malformed webhook payload: missing field {str(e)}. payload={payload}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Malformed webhook payload: missing field {str(e)}"
+            )
 
         dva_result = await db.execute(
             select(accounts).where(accounts.account_reference == account_reference)
