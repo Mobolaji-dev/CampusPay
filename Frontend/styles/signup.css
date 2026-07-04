@@ -365,3 +365,50 @@ input:focus {
         margin: 40px 0;
     }
 }
+
+/* Account Type Dropdown Styling */
+.select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.select-wrapper select {
+    width: 100%;
+    padding: 12px 16px;
+    padding-right: 40px; /* Prevents text from overlapping the custom arrow */
+    font-size: 16px;
+    font-family: inherit;
+    color: #1a1a1a; /* Update this to match your existing input text color */
+    background-color: #ffffff; /* Update to match your existing input background */
+    border: 1px solid #e2e8f0; /* Update to match your existing input border */
+    border-radius: 8px; /* Update to match your existing input border-radius */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* Style for the default "placeholder" option */
+.select-wrapper select:invalid {
+    color: #94a3b8; /* Matches typical placeholder text color */
+}
+
+.select-wrapper select:focus {
+    border-color: #000000; /* Update to your brand's primary focus color */
+    /* Add a box-shadow here if your other inputs have one on focus */
+}
+
+/* Custom SVG Arrow positioning */
+.select-arrow {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    pointer-events: none; /* Clicking the arrow will still open the select menu */
+    color: #64748b; /* Matches standard icon color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

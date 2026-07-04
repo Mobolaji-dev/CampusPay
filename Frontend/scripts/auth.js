@@ -60,7 +60,6 @@ async function syncWithBackend(token, uid, fullName = null, role = 'student') {
       },
       body: JSON.stringify({
         full_name: fullName,
-        fullname: fullName,
         role: role
       })
     });
@@ -120,12 +119,12 @@ if (signupForm) {
   signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const fullName = document.getElementById("fullName").value;
     const email = signupForm["signup-email"].value;
     const password = signupForm["signup-password"].value; 
-    const fullname = signupForm["fullName"].value;
+    const fullName = signupForm["fullName"].value;
+    const role = signupForm["accountType"].value;
 
-    signupbtn.classList.add('loading')
+    signupbtn.classList.add('loading');
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -143,7 +142,7 @@ if (signupForm) {
       localStorage.setItem('token', token);
       localStorage.setItem('uid', user.uid);
 
-      await syncWithBackend(token, user.uid, fullName, 'student');
+      await syncWithBackend(token, user.uid, fullName, role);
 
       signupbtn.classList.remove('loading');
       window.location.href = "dashboard.html";

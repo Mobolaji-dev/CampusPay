@@ -9,7 +9,7 @@
 <body>
     <div class="app-container">
         <header class="header">
-            <button class="back-btn" aria-label="Go back">
+            <button onclick="window.history.back()" class="back-btn" aria-label="Go back">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
@@ -41,6 +41,23 @@
                             <span class="code-text">+234</span>
                         </div>
                         <input type="tel" id="phone" placeholder="801 234 5678" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="accountType">Account Type</label>
+                    <div class="select-wrapper">
+                        <select id="accountType" required>
+                            <option value="" disabled selected>Select your account type</option>
+                            <option value="student">Student</option>
+                            <option value="vendor">Vendor</option>
+                        </select>
+                        <!-- Custom arrow to match the SVG icon aesthetic of your existing form -->
+                        <div class="select-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
                     </div>
                 </div>
 
