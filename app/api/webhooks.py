@@ -1,7 +1,7 @@
-from fastapi import FastAPI ,Request,Depends, APIRouter, HTTPException
+from fastapi import FastAPI, Request, Depends, APIRouter, HTTPException
 import json
 import logging
-from sqlalchemy.ext.asyncio import AsyncSession 
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from sqlalchemy import select
 from app.core.security_webhook import verify_nomba_signature
@@ -11,12 +11,8 @@ from decimal import Decimal
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
-raw_body = await request.body()
-logger.info(f"RAW HEADERS: {dict(request.headers)}")
-logger.info(f"RAW BODY: {raw_body.decode()}")
-signature = request.headers.get("nomba-signature", "")
-timestamp = request.headers.get("nomba-timestamp", "")
 router = APIRouter()
+
 
 @router.post("/webhook/nomba")
 async def nomba_webhook(request: Request, db: AsyncSession = Depends(get_db)):
