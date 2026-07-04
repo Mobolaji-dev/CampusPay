@@ -7,6 +7,22 @@ class AuthSyncRequest(BaseModel):
     role: str = "student"
     phone: str | None = None
 
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        name = v.strip()
+        if not name:
+            return None
+    
+        if not re.fullmatch(r"[A-Za-z\u00C0-\u024F\s'\-]+", name):
+            raise ValueError(
+                "Name must contain only letters, spaces, hyphens, or apostrophes. "
+                "Special characters like @, #, &, numbers etc. are not allowed."
+            )
+        return name
+
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v: str | None) -> str | None:
