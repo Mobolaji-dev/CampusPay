@@ -121,6 +121,7 @@ body {
 }
 
 .btn-primary, .btn-secondary {
+    text-decoration: none;
     flex: 1;
     padding: 16px;
     border-radius: 8px;

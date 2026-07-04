@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Setup - Set PIN</title>
+    <title>CampusPay - Set PIN</title>
     <link rel="stylesheet" href="styles/pin.css">
 </head>
 <body>
     <div class="app-container">
         <header class="header">
-            <button class="back-btn" aria-label="Go back">
+            <button class="back-btn" aria-label="Go back" onclick="window.history.back()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
@@ -71,5 +71,7 @@
             </div>
         </section>
     </div>
+
+    <script type="module" src="scripts/pin.js"></script>
 </body>
 </html>
