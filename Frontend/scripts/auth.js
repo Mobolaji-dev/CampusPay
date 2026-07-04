@@ -124,8 +124,8 @@ if (signupForm) {
     const password = signupForm["signup-password"].value; 
     const fullName = signupForm["fullName"].value;
     const role = signupForm["accountType"].value;
-    const phoneNo = signupForm["phone"].value;
-
+    const rawPhone = signupForm["phone"].value;
+    const phoneNo = rawPhone.startWith("0") ? `+234${rawPhone.slice(1)}` : `+234${rawPhone}`;
     signupbtn.classList.add('loading');
 
     try {
