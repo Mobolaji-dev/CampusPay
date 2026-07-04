@@ -35,4 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// remove any special character
+
+const fullName = document.getElementById("fullName");
+
+fullName.addEventListener("input", (e) => {
+    e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, "")
+})
+
 
