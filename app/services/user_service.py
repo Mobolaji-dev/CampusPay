@@ -108,7 +108,14 @@ async def get_or_create_user(
             response_data["bank_account_number"] = va_data.get("bankAccountNumber")
             response_data["bank_name"] = va_data.get("bankName")
         else:
-            logger.error(f"VA creation failed for {new_user.user_id}: {va_response}")
+            description = va_response.get("description", "")
+            if "sandbox" in description.lower() or "2 sandbox" in description.lower():
+                logger.warning(
+                    f"Sandbox DVA cap reached for {new_user.user_id}: {description}. "
+                    "User created without a bank account — expected in sandbox mode."
+                )
+            else:
+                logger.error(f"VA creation failed for {new_user.user_id}: {va_response}")
 
     await db.commit()
     return response_data
