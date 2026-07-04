@@ -1,5 +1,5 @@
 import {auth} from "./firebaseAuth.js";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 
 const loginForm = document.getElementById("login-form");
@@ -23,6 +23,10 @@ export async function getToken() {
         const token = await user.getIdToken(true);
         localStorage.setItem('token', token);
         localStorage.setItem('uid', user.uid);
+        // Cache displayName for self-healing sync fallback
+        if (user.displayName) {
+          localStorage.setItem('displayName', user.displayName);
+        }
         resolve(token);
       } catch (err) {
         console.error('Failed to refresh auth token:', err);
@@ -94,7 +98,8 @@ if (loginForm) {
       localStorage.setItem('token', token);
       localStorage.setItem('uid', user.uid);
 
-      await syncWithBackend(token, user.uid, null, 'student');
+      // Pass displayName on login so the backend can correct a fallback name
+      await syncWithBackend(token, user.uid, user.displayName || null, 'student');
 
       loginbtn.classList.remove('loading');
       window.location.href = "dashboard.html";
@@ -123,10 +128,16 @@ if (signupForm) {
     signupbtn.classList.add('loading')
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       // Signed up
-      
       const user = userCredential.user;
+
+      // Persist displayName in Firebase so future logins can pass it to the backend
+      if (fullName) {
+        await updateProfile(user, { displayName: fullName });
+        localStorage.setItem('displayName', fullName);
+      }
+
       const token = await user.getIdToken(true);
       console.log("User signed up:", user);
       localStorage.setItem('token', token);

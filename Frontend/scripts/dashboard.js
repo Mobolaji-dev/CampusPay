@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
+          full_name: localStorage.getItem('displayName') || null,
           role: 'student'
         })
       });
@@ -61,7 +62,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const accountNum = document.getElementById("account-number");
     const bankName = document.getElementById("bank-name");
 
-    if (accountName) accountName.textContent = wallet.full_name || "CampusPay User";
+    if (accountName) {
+      accountName.textContent = wallet.full_name
+        || localStorage.getItem('displayName')
+        || localStorage.getItem('fullName')
+        || "CampusPay User";
+    }
     
     if (availableBal) {
       availableBal.innerHTML = `&#8358;${parseFloat(wallet.available_balance || 0).toLocaleString()}`;
