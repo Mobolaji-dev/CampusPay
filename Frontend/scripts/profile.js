@@ -26,24 +26,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = "index.html";
       return;
     }
+
+    const profile = await res.json();
+
+
+    const profileName  =  document.getElementById("profile-name");
+    const email = document.getElementById("email");
+    const phone = document.getElementById("phone")
+    const role = document.getElementById("role");
+
+    profileName.textContent = profile.full_name;
+    email.textContent = profile.email;
+    phone.textContent = profile.phone;
+    role.textContent = profile.role;
+    
   } catch(err) {
     console.error(err);
   }
 
 
-  const profile = await res.json();
-
-
-  const profileName  =  document.getElementById("profile-name");
-  const email = document.getElementById("email");
-  const phone = document.getElementById("phone")
-  const role = document.getElementById("role");
-
-  profileName.textContent = profile.full_name;
-  email.textContent = profile.email;
-  phone.textContent = profile.phone;
-  role.textContent = profile.role;
-})
+ 
+});
 
 
 
