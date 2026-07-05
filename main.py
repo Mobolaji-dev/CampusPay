@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api import auth, webhooks, wallet, profile
+from app.api import auth, webhooks, wallet, profile, orders
 from app.core.database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -24,6 +24,7 @@ app.include_router(auth.router)
 app.include_router(webhooks.router, tags=["webhooks"])
 app.include_router(wallet.router, prefix="/api", tags=["wallet"])
 app.include_router(profile.router)
+app.include_router(orders.router)
 
 
 @app.get("/health")
