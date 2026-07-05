@@ -8,7 +8,7 @@ const PRECACHE_URLS = [
   '/styles/profile.css', '/styles/pin.css', '/styles/receipt.css', '/styles/transactions.css',
 
   '/scripts/index.js', '/scripts/signup.js', '/scripts/dashboard.js',
-  '/scripts/profile.js', '/scripts/pin.js', '/scripts/auth.js', '/scripts/firebaseAuth.js', 'scripts/pwa.js',
+  '/scripts/profile.js', '/scripts/pin.js', '/scripts/auth.js', '/scripts/firebaseAuth.js', '/scripts/pwa.js', '/scripts/purchase.js',
 
   '/manifest.json',
   '/icons/Icon_1.png', '/icons/Icon_2.png' , '/icons/Icon_3.png'
