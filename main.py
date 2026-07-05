@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
-from app.api import auth, webhooks, wallet, profile, orders
+from app.api import auth, catalog, webhooks, wallet, profile, orders
 from app.core.database import Base, engine, AsyncSessionLocal
 from app.models.models import orders as Orders, wallets, orderstat
 from app.models import models  # noqa: F401 — registers all tables against Base
@@ -107,6 +107,7 @@ app.include_router(webhooks.router, tags=["webhooks"])
 app.include_router(wallet.router, prefix="/api", tags=["wallet"])
 app.include_router(profile.router)
 app.include_router(orders.router)
+app.include_router(catalog.router)
 
 
 @app.get("/health")

@@ -5,6 +5,7 @@ from sqlalchemy import (
     Text,
     DateTime,
     Numeric,
+    Boolean,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -53,6 +54,9 @@ class users(Base):
     vendor_bank_account: Mapped[str | None] = mapped_column(String, nullable=True)
     vendor_bank_code: Mapped[int | None] = mapped_column(String, nullable=True)
     transaction_pin_hash: Mapped[str | None] = mapped_column(String, nullable=True)
+    vendor_location: Mapped[str | None] = mapped_column(String, nullable=True)
+    vendor_is_open: Mapped[bool] = mapped_column(Boolean, server_default="false", default=False)
+    vendor_cover_image_url: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.now,
