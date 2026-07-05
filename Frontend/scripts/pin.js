@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const setPinBtn = document.querySelector(".set-pin-btn");
 
     // 2. App State Variables
-    let currentPin = "";
+    
     const PIN_LENGTH = 4;
 
     // 3. Update the UI based on currentPin state
@@ -69,9 +69,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     setPinBtn.addEventListener("click", () => {
         if (currentPin.length === PIN_LENGTH) {
             // Optional: Alert to show the user it worked
-            alert(currentPin)
-            
-            // TODO: Add your API fetch/axios logic here
         }
     });
 
@@ -94,12 +91,11 @@ pinButton.addEventListener("click", async (e) => {
             "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-            pin: currentPin,
+            pin: currentPin
         })
     });
 
     if(!response.ok) {
-        const errText = await response.text();
         throw new Error(`Error setting pin: ${errText}`)
     } else {
         console.log('PIN set successful');
