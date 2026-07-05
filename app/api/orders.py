@@ -5,6 +5,7 @@ from decimal import Decimal
 from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -12,7 +13,8 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import get_current_firebase_user
 from app.models.models import users, wallets, orders, orderstat
-from app.schemas.orders import PlaceOrderRequest, PlaceOrderResponse
+from app.schemas.orders import PlaceOrderRequest, PlaceOrderResponse, ScanQRRequest
+from app.services.nomba import transfer_to_bank
 
 logger = logging.getLogger(__name__)
 
@@ -126,3 +128,140 @@ async def place_order(
         await db.rollback()
         logger.exception(e)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+
+
+
+@router.post("/{order_id}/scan", status_code=200)
+async def scan_order_qr(
+    order_id: str,
+    body: ScanQRRequest,
+    firebase_user: dict = Depends(get_current_firebase_user),
+    db: AsyncSession = Depends(get_db),
+):
+    #  Decode + verify JWT before any DB or money logic
+    try:
+        token_data = jwt.decode(body.qr_token, settings.SECRET_KEY, algorithms=[QR_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="QR code has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid QR token")
+
+    token_order_id = token_data.get("order_id")
+    token_vendor_id = token_data.get("vendor_id")
+
+    # order_id in URL must match order_id inside the token
+    if token_order_id != order_id:
+        raise HTTPException(status_code=401, detail="QR token does not match this order")
+
+    # Identify the scanning vendor 
+    firebase_uid = firebase_user.get("uid")
+    vendor_result = await db.execute(
+        select(users).where(users.firebase_uid == firebase_uid)
+    )
+    vendor = vendor_result.scalar_one_or_none()
+
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+
+    # Load order
+    order_result = await db.execute(
+        select(orders).where(orders.order_id == order_id)
+    )
+    order = order_result.scalar_one_or_none()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    if order.order_status != orderstat.pending:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Order cannot be confirmed — current status: {order.order_status.value}"
+        )
+
+    # vendor scanning the QR must be the vendor the order was placed with
+    if token_vendor_id != vendor.user_id:
+        raise HTTPException(status_code=403, detail="This QR code is not for your store")
+
+    #  Load student wallet 
+    wallet_result = await db.execute(
+        select(wallets).where(wallets.user_id == order.student_id)
+    )
+    wallet = wallet_result.scalar_one_or_none()
+
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Student wallet not found")
+    
+    if not vendor.vendor_bank_account or not vendor.vendor_bank_code:
+        raise HTTPException(status_code=422,
+                            detail="Vendor has not set up bank account details for payouts"
+                            )
+
+
+    # ── PHASE 1: Release escrow + mark confirmed — commit before Nomba ─
+    # locked_balance decreases; available_balance stays the same (money left the system)
+    wallet.locked_balance -= order.escrow_hold
+    wallet.updated_at = datetime.now(timezone.utc)
+    order.order_status = orderstat.confirmed
+
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.exception(f"DB commit failed during scan for order {order_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to confirm order — please retry")
+
+    logger.info(
+        f"Escrow released: order={order_id}, student={order.student_id}, "
+        f"vendor={vendor.user_id}, escrow_hold={order.escrow_hold}"
+    )
+
+    # ── PHASE 2: Call Nomba transfer — AFTER DB commit ─────────────────
+    # Only item_amount goes to vendor; platform fee stays with CampusPay
+    nomba_ref = None
+    try:
+        nomba_result = await transfer_to_bank(
+            amount=order.item_amount,
+            account_name=vendor.full_name,
+            account_number=vendor.vendor_bank_account,
+            bank_code=str(vendor.vendor_bank_code),
+            sender_name="CampusPay",
+            narration=f"Payment for order {order_id[:8]} — {order.item_description[:40]}",
+            merchantTxRef=order_id,              # idempotency key — safe to retry
+        )
+        
+        if nomba_result.get("code") == "00":
+            nomba_ref = nomba_result.get("data", {}).get("transferRef") or order_id
+            logger.info(f"Nomba transfer succeeded: order={order_id}, ref={nomba_ref}")
+        else:
+            # Nomba rejected the transfer — escrow already released, log for manual ops
+            logger.error(
+                f"[ACTION REQUIRED] Nomba transfer FAILED after escrow release. "
+                f"order={order_id}, vendor={vendor.user_id}, amount={order.item_amount}, "
+                f"nomba_response={nomba_result}"
+            )
+
+    except Exception as e:
+        # Network or unexpected error — same situation: escrow released, vendor not yet paid
+        logger.error(
+            f"[ACTION REQUIRED] Nomba transfer raised exception after escrow release. "
+            f"order={order_id}, vendor={vendor.user_id}, amount={order.item_amount}, error={e}"
+        )
+
+    # ── PHASE 3: Store Nomba transfer ref (best-effort second commit) ──
+    if nomba_ref:
+        try:
+            order.nomba_transfer_ref = nomba_ref
+            await db.commit()
+        except Exception as e:
+            # Non-critical — money moved, just couldn't record the ref
+            logger.error(f"Failed to save nomba_transfer_ref for order {order_id}: {e}")
+
+    return {
+        "message": "Order confirmed",
+        "order_id": order_id,
+        "amount_paid_to_vendor": str(order.item_amount),
+        "nomba_transfer_ref": nomba_ref,
+    }
+

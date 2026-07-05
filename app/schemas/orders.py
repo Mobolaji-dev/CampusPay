@@ -30,3 +30,7 @@ class PlaceOrderResponse(BaseModel):
     qr_token: str
     timer_expires_at: datetime
     total_charged: str  
+
+
+class ScanQRRequest(BaseModel):
+    qr_token: str
