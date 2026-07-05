@@ -23,7 +23,7 @@ async def expiry_job():
                 result = await db.execute(
                     select(Orders).where(
                         Orders.order_status == orderstat.pending,
-                        Orders.timer_expires_at <= datetime.now(timezone.utc),
+                        Orders.timer_expires_at <= datetime.now(timezone.utc).replace(tzinfo=None),
                     )
                 )
                 expired_orders = result.scalars().all()
