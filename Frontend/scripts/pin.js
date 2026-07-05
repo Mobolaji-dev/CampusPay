@@ -84,22 +84,25 @@ const API_BASE_URL = window.location.hostname === 'localhost' || window.location
 pinButton.addEventListener("click", async (e) => {
     e.preventDefault();
 
-    const response = fetch(`${API_BASE_URL}/api/profile/set-pin`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            pin: currentPin
-        })
-    });
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/profile/set-pin`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                pin: currentPin
+            })
+        });
 
-    if(!response.ok, error) {
-        console.error(error)
-        throw new Error(`Error setting pin`)
-    } else {
-        console.log('PIN set successful');
-        window.location.href = "profile.html";
+        if(!response.ok) {
+            throw new Error(`Error setting pin`)
+        } else {
+            console.log('PIN set successful');
+            window.location.href = "profile.html";
+        }
+    } catch (err) {
+        console.error(err);
     }
 });
