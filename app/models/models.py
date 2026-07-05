@@ -18,9 +18,10 @@ import uuid
 
 
 class approles(Enum):
-    vendor = "Vendor"
+    Vendor = "Vendor"
     Student = "Student"
-    admin = "Admin"
+    Admin = "Admin"
+
 
 
 class accstatus(Enum):

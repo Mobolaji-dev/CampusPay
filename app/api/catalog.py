@@ -33,7 +33,7 @@ async def list_vendors(
 ) -> list[VendorSummary]:
    
     try:
-        stmt = select(users).where(users.role == approles.vendor)
+        stmt = select(users).where(users.role == approles.Vendor)
 
         if is_open is not None:
             stmt = stmt.where(users.vendor_is_open == is_open)
@@ -93,7 +93,7 @@ async def get_vendor(
         vendor_result = await db.execute(
             select(users).where(
                 users.user_id == vendor_id,
-                users.role == approles.vendor, 
+                users.role == approles.Vendor, 
             )
         )
         vendor = vendor_result.scalar_one_or_none()
