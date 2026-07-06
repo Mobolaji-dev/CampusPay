@@ -6,8 +6,16 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.security import get_current_firebase_user
 from app.models.models import approles, products, users
-from app.schemas.catalog import ProductItem, VendorDetail, VendorSummary
+from app.schemas.catalog import (
+    ProductCreateRequest,
+    ProductItem,
+    ProductResponse,
+    ProductUpdateRequest,
+    VendorDetail,
+    VendorSummary,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -145,3 +153,129 @@ async def get_vendor(
             status_code=500,
             detail="Unable to fetch vendor details. Please try again later.",
         )
+
+
+async def _resolve_vendor(firebase_user: dict, db: AsyncSession) -> users:
+    """Resolve Firebase token → DB user, enforce Vendor role."""
+    firebase_uid = firebase_user.get("uid")
+    result = await db.execute(select(users).where(users.firebase_uid == firebase_uid))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.role != approles.Vendor:
+        raise HTTPException(status_code=403, detail="Vendor access required")
+    return user
+
+
+@router.post(
+    "/products",
+    response_model=ProductResponse,
+    status_code=201,
+    summary="Create a new product",
+)
+async def create_product(
+    body: ProductCreateRequest,
+    firebase_user: dict = Depends(get_current_firebase_user),
+    db: AsyncSession = Depends(get_db),
+) -> ProductResponse:
+    try:
+        vendor = await _resolve_vendor(firebase_user, db)
+
+        new_product = products(
+            vendor_id=vendor.user_id,
+            name=body.name,
+            description=body.description,
+            price=body.price,
+            is_available=True,
+        )
+        db.add(new_product)
+        await db.commit()
+        await db.refresh(new_product)
+        return ProductResponse.model_validate(new_product)
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unexpected error in create_product")
+        raise HTTPException(status_code=500, detail="Unable to create product.")
+
+
+@router.put(
+    "/products/{product_id}",
+    response_model=ProductResponse,
+    summary="Update a product (partial)",
+)
+async def update_product(
+    product_id: Annotated[str, Path(description="UUID of the product")],
+    body: ProductUpdateRequest,
+    firebase_user: dict = Depends(get_current_firebase_user),
+    db: AsyncSession = Depends(get_db),
+) -> ProductResponse:
+    try:
+        vendor = await _resolve_vendor(firebase_user, db)
+
+        result = await db.execute(
+            select(products).where(products.product_id == product_id)
+        )
+        product = result.scalar_one_or_none()
+
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        if product.vendor_id != vendor.user_id:
+            raise HTTPException(
+                status_code=403, detail="You do not own this product"
+            )
+
+        if body.name is not None:
+            product.name = body.name
+        if body.description is not None:
+            product.description = body.description
+        if body.price is not None:
+            product.price = body.price
+        if body.is_available is not None:
+            product.is_available = body.is_available
+
+        await db.commit()
+        await db.refresh(product)
+        return ProductResponse.model_validate(product)
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unexpected error in update_product product_id=%s", product_id)
+        raise HTTPException(status_code=500, detail="Unable to update product.")
+
+
+@router.delete(
+    "/products/{product_id}",
+    summary="Delete a product",
+)
+async def delete_product(
+    product_id: Annotated[str, Path(description="UUID of the product")],
+    firebase_user: dict = Depends(get_current_firebase_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    try:
+        vendor = await _resolve_vendor(firebase_user, db)
+
+        result = await db.execute(
+            select(products).where(products.product_id == product_id)
+        )
+        product = result.scalar_one_or_none()
+
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        if product.vendor_id != vendor.user_id:
+            raise HTTPException(
+                status_code=403, detail="You do not own this product"
+            )
+
+        await db.delete(product)
+        await db.commit()
+        return {"message": "Product deleted"}
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unexpected error in delete_product product_id=%s", product_id)
+        raise HTTPException(status_code=500, detail="Unable to delete product.")
