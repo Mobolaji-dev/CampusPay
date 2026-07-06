@@ -1,8 +1,4 @@
-﻿import { getToken } from './auth.js';
-
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:8000'
-  : 'https://campuspay.pxxl.run';
+import { getToken, API_BASE_URL } from './auth.js';
 
 const currencyFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',

@@ -46,9 +46,22 @@ export function getUid() {
 
 
 
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:8000'
-  : 'https://campuspay.pxxl.run';
+export const API_BASE_URL = (() => {
+  const hostname = window.location.hostname;
+  if (
+    !hostname ||
+    hostname === 'localhost' || 
+    hostname === '127.0.0.1' || 
+    hostname.startsWith('192.168.') || 
+    hostname.startsWith('172.') || 
+    hostname.startsWith('10.')
+  ) {
+    return hostname && hostname !== 'localhost' && hostname !== '127.0.0.1'
+      ? `http://${hostname}:3000`
+      : 'http://localhost:3000';
+  }
+  return 'https://campuspay.pxxl.run';
+})();
 
 async function syncWithBackend(token, uid, fullName = null, role = null, phoneNo) {
   try {
