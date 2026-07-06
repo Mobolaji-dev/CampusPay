@@ -27,81 +27,18 @@
     </header>
 
     <main class="content">
-      
-      <div class="filter-tabs">
-        <button class="tab active">All</button>
-        <button class="tab">Income</button>
-        <button class="tab">Expenses</button>
+      <div class="filter-tabs" role="tablist">
+        <button class="tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+        <button class="tab" data-filter="in" role="tab" aria-selected="false">Income</button>
+        <button class="tab" data-filter="out" role="tab" aria-selected="false">Expenses</button>
       </div>
 
-      <section class="date-group">
-        <h2 class="date-header">TODAY</h2>
-        
-        <article class="transaction-card">
-          <div class="icon-box bg-blue-light">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#0047FF" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-          </div>
-          <div class="card-details">
-            <h3 class="item-title">MacBook Air M2</h3>
-            <p class="item-category">Electronics &bull; 14:20</p>
-          </div>
-          <div class="card-amounts">
-            <p class="amount negative">-&#8358;450,000</p>
-            <span class="badge badge-purple">COMPLETED</span>
-          </div>
-        </article>
-
-        <article class="transaction-card">
-          <div class="icon-box bg-green-light">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-          </div>
-          <div class="card-details">
-            <h3 class="item-title">Funds Deposit</h3>
-            <p class="item-category">Credit &bull; 09:15</p>
-          </div>
-          <div class="card-amounts">
-            <p class="amount positive">+&#8358;50,000</p>
-            <span class="badge badge-green">COMPLETED</span>
-          </div>
-        </article>
+      <section id="transaction-list" class="transaction-list" aria-live="polite">
+        <div class="empty-state">
+          <p class="empty-title">Loading your transaction history…</p>
+          <p class="empty-subtitle">Please wait while we fetch your latest activity.</p>
+        </div>
       </section>
-
-      <section class="date-group">
-        <h2 class="date-header">YESTERDAY</h2>
-        
-        <article class="transaction-card">
-          <div class="icon-box bg-blue-light">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#0047FF" stroke-width="2"><path d="M20.38 3.46L16 2a8 8 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
-          </div>
-          <div class="card-details">
-            <h3 class="item-title">Campus Varsity Hoodie</h3>
-            <p class="item-category">Fashion &bull; 18:45</p>
-          </div>
-          <div class="card-amounts">
-            <p class="amount negative">-&#8358;18,000</p>
-            <span class="badge badge-purple">COMPLETED</span>
-          </div>
-        </article>
-      </section>
-
-      <section class="date-group">
-        <h2 class="date-header">OCT 23</h2>
-        
-        <article class="transaction-card">
-          <div class="icon-box bg-blue-light">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#0047FF" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-          </div>
-          <div class="card-details">
-            <h3 class="item-title">Organic Chemistry Vol 2</h3>
-            <p class="item-category">Education &bull; 11:30</p>
-          </div>
-          <div class="card-amounts">
-            <p class="amount negative">-&#8358;12,500</p>
-            <span class="badge badge-orange">PROCESSING</span>
-          </div>
-        </article>
-      </section>
-
     </main>
 
     <nav class="bottom-nav">
@@ -123,9 +60,9 @@
         </a>
     </nav>
   </div>
-  </div>
 
 
+  <script type="module" src="scripts/transactions.js"></script>
   <script src="scripts/pwa.js" ></script>
 
 </body>
