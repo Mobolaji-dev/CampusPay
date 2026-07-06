@@ -62,8 +62,12 @@ class users(Base):
         nullable=True,
     )
 
-    # Fixed type annotation
     vendor_bank_code: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
+
+    vendor_bank_name: Mapped[str | None] = mapped_column(
         String,
         nullable=True,
     )

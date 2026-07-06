@@ -9,6 +9,9 @@ class ProfileResponse(BaseModel):
     phone: str | None
     role: str
     has_transaction_pin: bool
+    vendor_bank_account: str | None = None
+    vendor_bank_code: str | None = None
+    vendor_bank_name: str | None = None
 
 
 class SetPinRequest(BaseModel):
@@ -21,3 +24,31 @@ class SetPinRequest(BaseModel):
         if not re.fullmatch(r"\d{4}", pin):
             raise ValueError("Transaction PIN must be exactly 4 digits (numbers only).")
         return pin
+
+
+
+class BankItem(BaseModel):
+    name: str
+    code: str
+
+
+
+class AccountLookupRequest(BaseModel):
+    account_number: str
+    bank_code: str
+
+
+
+class VendorBankSetupRequest(BaseModel):
+    account_number: str
+    bank_code: str
+    account_name: str   # pre-resolved by frontend via lookup
+    bank_name: str      # human-readable bank label (e.g. "Access Bank")
+
+    @field_validator("account_number")
+    @classmethod
+    def validate_account_number(cls, v: str) -> str:
+        acct = v.strip()
+        if not re.fullmatch(r"\d{10}", acct):
+            raise ValueError("Account number must be exactly 10 digits.")
+        return acct
