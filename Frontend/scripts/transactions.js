@@ -31,12 +31,19 @@ function getStatusClass(status) {
   return 'status-pending';
 }
 
+function normalizeDirection(direction) {
+  const normalized = String(direction || '').toLowerCase().trim();
+  if (normalized === 'in' || normalized === 'credit') return 'in';
+  if (normalized === 'out' || normalized === 'debit') return 'out';
+  return 'out';
+}
+
 function getDirectionClass(direction) {
-  return String(direction).toLowerCase() === 'in' ? 'positive' : 'negative';
+  return direction === 'in' ? 'positive' : 'negative';
 }
 
 function getIconClasses(direction) {
-  return String(direction).toLowerCase() === 'in' ? 'bg-green-light' : 'bg-blue-light';
+  return direction === 'in' ? 'bg-green-light' : 'bg-blue-light';
 }
 
 function createTransactionCard(item) {
@@ -44,7 +51,7 @@ function createTransactionCard(item) {
   wrapper.className = 'transaction-card';
 
   const iconBox = document.createElement('div');
-  const directionValue = String(item.direction || 'out').toLowerCase();
+  const directionValue = normalizeDirection(item.direction);
   iconBox.className = `icon-box ${getIconClasses(directionValue)}`;
   iconBox.innerHTML = directionValue === 'in'
     ? '<i class="fa-solid fa-arrow-down-left" aria-hidden="true"></i>'
@@ -68,7 +75,7 @@ function createTransactionCard(item) {
   amounts.className = 'card-amounts';
 
   const amount = document.createElement('p');
-  const direction = String(item.direction || 'out').toLowerCase();
+  const direction = normalizeDirection(item.direction);
   const rawAmount = Number(String(item.amount || '0').replace(/[^0-9.-]+/g, ''));
   const sign = direction === 'in' ? '+' : '-';
   amount.className = `amount ${getDirectionClass(direction)}`;
