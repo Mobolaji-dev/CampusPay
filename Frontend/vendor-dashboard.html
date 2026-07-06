@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusPay — Vendor Dashboard</title>
+  <meta name="description" content="Vendor dashboard to manage and verify pending customer orders on CampusPay.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/vendor-dashboard.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="/icons/Icon_1.png">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="top-nav">
+      <div>
+        <p class="nav-subtitle">VENDOR PORTAL</p>
+        <h1 class="brand-logo">CampusPay</h1>
+      </div>
+      <div class="header-right">
+        <span id="vendor-name-tag" class="vendor-tag"></span>
+        <button id="refresh-btn" class="icon-btn" aria-label="Refresh orders" title="Refresh">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+
+      <div class="summary-bar">
+        <div>
+          <p class="stats-label">PENDING ORDERS</p>
+          <h2 id="order-count" class="stats-value">—</h2>
+        </div>
+        <span class="live-badge">
+          <span class="live-dot"></span>
+          Live
+        </span>
+      </div>
+
+      <div id="orders-list" class="orders-list">
+        <div class="loading-state">Loading orders…</div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="vendor-dashboard.html" class="nav-item active" id="nav-orders">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>Orders</span>
+      </a>
+      <a href="vendor-products.html" class="nav-item" id="nav-products">
+        <i class="fa-solid fa-box-open"></i>
+        <span>Products</span>
+      </a>
+      <a href="vendor-profile.html" class="nav-item" id="nav-profile">
+        <i class="fa-regular fa-user"></i>
+        <span>Profile</span>
+      </a>
+    </nav>
+
+  </div>
+
+  <!-- QR Scanner Modal -->
+  <div id="qr-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Scan QR Code">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Scan Customer QR</h2>
+        <button id="close-modal-btn" class="close-btn" aria-label="Close scanner">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p class="modal-hint">Point the camera at the student's QR code to verify payment.</p>
+
+      <div id="qr-reader" class="qr-reader-box"></div>
+
+      <!-- Fallback: manual token input -->
+      <div class="fallback-section">
+        <p class="fallback-label">Camera not available? Paste QR token manually:</p>
+        <div class="fallback-row">
+          <input type="text" id="manual-token-input" class="fallback-input" placeholder="Paste QR token here…">
+          <button id="manual-submit-btn" class="fallback-btn">Verify</button>
+        </div>
+      </div>
+
+      <div id="scan-status" class="scan-status hidden"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden" role="alert" aria-live="polite"></div>
+
+  <!-- html5-qrcode from CDN -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script type="module" src="scripts/vendor-dashboard.js"></script>
+  <script src="scripts/pwa.js"></script>
+</body>
+</html>
