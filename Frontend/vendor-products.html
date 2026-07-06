@@ -44,6 +44,11 @@
             <label for="new-description">Description <span class="optional">(optional)</span></label>
             <input type="text" id="new-description" placeholder="Short description…">
           </div>
+          <div class="input-group">
+            <label for="new-image">Product Image <span class="optional">(optional)</span></label>
+            <input type="file" id="new-image" accept="image/png,image/jpeg,image/webp">
+            <div id="new-image-preview" class="image-preview hidden"></div>
+          </div>
           <button type="submit" class="add-btn" id="add-btn">
             <i class="fa-solid fa-plus"></i>
             <span class="btn-text">Add Product</span>
@@ -104,6 +109,11 @@
         <div class="input-group">
           <label for="edit-description">Description</label>
           <input type="text" id="edit-description">
+        </div>
+        <div class="input-group">
+          <label for="edit-image">Product Image <span class="optional">(optional)</span></label>
+          <input type="file" id="edit-image" accept="image/png,image/jpeg,image/webp">
+          <div id="edit-image-preview" class="image-preview hidden"></div>
         </div>
         <div class="input-group toggle-group">
           <label class="toggle-label">

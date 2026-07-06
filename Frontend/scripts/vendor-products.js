@@ -1,9 +1,16 @@
-import { getToken, API_BASE_URL } from './auth.js';
+import { getToken } from './auth.js';
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js';
 
-// ── State ─────────────────────────────────────────────────────────────────────
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8000'
+  : 'https://campuspay.pxxl.run';
+
+// ── State ─────────────────────────────────────────────────────────────────
 let vendorId = null;
 let editingProductId = null;
 let deletingProductId = null;
+let selectedAddImageFile = null;
+let selectedEditImageFile = null;
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
 const productsList    = document.getElementById('products-list');
@@ -11,6 +18,8 @@ const productCountTag = document.getElementById('product-count-tag');
 const addForm         = document.getElementById('add-product-form');
 const addBtn          = document.getElementById('add-btn');
 const formError       = document.getElementById('form-error');
+const addImageInput   = document.getElementById('new-image');
+const addImagePreview = document.getElementById('new-image-preview');
 
 const editModal       = document.getElementById('edit-modal');
 const closeEditBtn    = document.getElementById('close-edit-btn');
@@ -18,6 +27,8 @@ const editForm        = document.getElementById('edit-product-form');
 const editName        = document.getElementById('edit-name');
 const editPrice       = document.getElementById('edit-price');
 const editDesc        = document.getElementById('edit-description');
+const editImageInput  = document.getElementById('edit-image');
+const editImagePreview= document.getElementById('edit-image-preview');
 const editAvailable   = document.getElementById('edit-available');
 const saveBtn         = document.getElementById('save-btn');
 const editError       = document.getElementById('edit-error');
@@ -59,11 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Add form submit
   addForm.addEventListener('submit', handleAddProduct);
+  addImageInput?.addEventListener('change', handleAddImageSelect);
 
   // Edit modal
   closeEditBtn.addEventListener('click', closeEditModal);
   editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEditModal(); });
   editForm.addEventListener('submit', handleSaveEdit);
+  editImageInput?.addEventListener('change', handleEditImageSelect);
 
   // Delete modal
   cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.remove('open'));
@@ -136,7 +149,12 @@ function createProductRow(product) {
 
   const isAvail = product.is_available;
 
+  const thumbnailHtml = product.image_url
+    ? `<div class="product-thumb"><img src="${escAttr(product.image_url)}" alt="${escAttr(product.name)}"></div>`
+    : `<div class="product-thumb fallback">No Image</div>`;
+
   row.innerHTML = `
+    ${thumbnailHtml}
     <div class="product-info">
       <div class="product-name">${escHtml(product.name)}</div>
       ${product.description ? `<div class="product-desc">${escHtml(product.description)}</div>` : ''}
@@ -177,13 +195,25 @@ async function handleAddProduct(e) {
   const token = await getToken();
 
   try {
+    let imageUrl = null;
+    if (selectedAddImageFile) {
+      imageUrl = await uploadProductImage(selectedAddImageFile);
+    }
+
+    const body = {
+      name,
+      price,
+      description: desc || null,
+    };
+    if (imageUrl) body.image_url = imageUrl;
+
     const res = await fetch(`${API_BASE_URL}/api/catalog/products`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, price, description: desc || null }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -192,9 +222,11 @@ async function handleAddProduct(e) {
     }
 
     addForm.reset();
+    resetAddImageSelection();
     showToast('Product added!', 'success');
     await loadProducts();
   } catch (err) {
+    console.error('Add product error', err);
     showFormError(formError, 'Network error. Please retry.');
   } finally {
     addBtn.classList.remove('btn-loading');
@@ -209,12 +241,104 @@ function openEditModal(product) {
   editDesc.value = product.description || '';
   editAvailable.checked = product.is_available;
   editError.classList.add('hidden');
+  resetEditImageSelection();
   editModal.classList.add('open');
 }
 
 function closeEditModal() {
   editModal.classList.remove('open');
   editingProductId = null;
+  resetEditImageSelection();
+}
+
+function handleAddImageSelect() {
+  const file = addImageInput.files?.[0];
+  if (!file) {
+    resetAddImageSelection();
+    return;
+  }
+
+  const error = validateImageFile(file);
+  if (error) {
+    addImageInput.value = '';
+    showFormError(formError, error);
+    resetAddImageSelection();
+    return;
+  }
+
+  formError.classList.add('hidden');
+  selectedAddImageFile = file;
+  showImagePreview(addImagePreview, file);
+}
+
+function handleEditImageSelect() {
+  const file = editImageInput.files?.[0];
+  if (!file) {
+    resetEditImageSelection();
+    return;
+  }
+
+  const error = validateImageFile(file);
+  if (error) {
+    editImageInput.value = '';
+    showFormError(editError, error);
+    resetEditImageSelection();
+    return;
+  }
+
+  editError.classList.add('hidden');
+  selectedEditImageFile = file;
+  showImagePreview(editImagePreview, file);
+}
+
+function validateImageFile(file) {
+  const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!allowed.includes(file.type)) {
+    return 'Please choose a PNG, JPG, or WEBP image.';
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return 'Image must be smaller than 5 MB.';
+  }
+  return null;
+}
+
+function showImagePreview(container, file) {
+  container.innerHTML = `<img src="${escAttr(URL.createObjectURL(file))}" alt="Selected product image preview">`;
+  container.classList.remove('hidden');
+}
+
+function resetAddImageSelection() {
+  selectedAddImageFile = null;
+  addImagePreview.innerHTML = '';
+  addImagePreview.classList.add('hidden');
+  addImageInput.value = '';
+}
+
+function resetEditImageSelection() {
+  selectedEditImageFile = null;
+  editImagePreview.innerHTML = '';
+  editImagePreview.classList.add('hidden');
+  editImageInput.value = '';
+}
+
+async function uploadProductImage(file) {
+  const storage = getStorage();
+  const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const ownerId = vendorId || localStorage.getItem('uid') || 'anonymous';
+  const path = `vendor-products/${ownerId}/${Date.now()}-${safeFileName}`;
+  const ref = storageRef(storage, path);
+  const uploadTask = uploadBytesResumable(ref, file);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on('state_changed', null, reject, async () => {
+      try {
+        const url = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve(url);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
 }
 
 async function handleSaveEdit(e) {
@@ -233,18 +357,24 @@ async function handleSaveEdit(e) {
   const token = await getToken();
 
   try {
+    const body = {
+      name,
+      price,
+      description: desc || null,
+      is_available: isAvail,
+    };
+
+    if (selectedEditImageFile) {
+      body.image_url = await uploadProductImage(selectedEditImageFile);
+    }
+
     const res = await fetch(`${API_BASE_URL}/api/catalog/products/${encodeURIComponent(editingProductId)}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        name,
-        price,
-        description: desc || null,
-        is_available: isAvail,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -256,6 +386,7 @@ async function handleSaveEdit(e) {
     showToast('Product updated!', 'success');
     await loadProducts();
   } catch (err) {
+    console.error('Edit product error', err);
     showFormError(editError, 'Network error. Please retry.');
   } finally {
     saveBtn.classList.remove('btn-loading');

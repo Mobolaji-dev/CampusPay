@@ -139,7 +139,8 @@ body {
 }
 
 .input-group input[type="text"],
-.input-group input[type="number"] {
+.input-group input[type="number"],
+.input-group input[type="file"] {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid var(--border);
@@ -155,6 +156,47 @@ body {
 .input-group input:focus {
   border-color: var(--brand-blue);
   background: #fff;
+}
+
+.image-preview {
+  margin-top: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  min-height: 100px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-thumb.fallback {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .add-btn {
