@@ -61,7 +61,7 @@ async function submitPayment(event) {
     return;
   }
 
-  const totalAmount = Number(item.price || 0) + 20;
+  const totalAmount = Number(item.price || 0);
   const payload = {
     vendor_id: item.vendor_id,
     item_description: item.name,
