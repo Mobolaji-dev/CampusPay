@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -14,16 +14,18 @@
 <body>
 
   <div class="app-container">
-    
     <header class="top-nav">
-      <button onclick="window.history.back()" class="icon-btn back-btn">
+      <button onclick="window.history.back()" class="icon-btn back-btn" aria-label="Go back">
         <svg viewBox="0 0 24 24" fill="none" stroke="#0047FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="19" y1="12" x2="5" y2="12"></line>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <h1 class="page-title">Pending Transactions</h1>
-      <button class="icon-btn history-btn">
+      <div>
+        <p class="subtitle">AWAITING VERIFICATION</p>
+        <h1 class="page-title">Pending Orders</h1>
+      </div>
+      <button class="icon-btn history-btn" aria-label="Pending history">
         <svg viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 8v4l3 3"></path>
           <path d="M3.05 11a9 9 0 1 1 .5 4m-.5-5v5h5"></path>
@@ -32,116 +34,40 @@
     </header>
 
     <main class="content">
-      
-      <div class="list-header">
+      <section class="summary-bar">
         <div>
-          <p class="subtitle">AWAITING VERIFICATION</p>
-          <h2 class="title-count">3 Items Found</h2>
+          <p class="stats-label">Pending order activity</p>
+          <h2 id="order-count" class="stats-value">Loading…</h2>
         </div>
-        <div class="filter-box"></div>
-      </div>
+        <div class="badge-pill">Pending</div>
+      </section>
 
-      <div class="transactions-list">
-        
-        <article class="transaction-card">
-          <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=600&q=80" alt="MacBook Air M2" class="card-img">
-          <div class="card-body">
-            <div class="card-header">
-              <h3 class="item-title">MacBook Air M2</h3>
-              <p class="item-price">&#8358;450,000</p>
-            </div>
-            <p class="item-desc">Slightly used, excellent condition. Battery health 98%.</p>
-            <div class="item-location">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <span>Male Hostel B</span>
-            </div>
-            <div class="card-footer">
-              <div class="status pending">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>PENDING</span>
-              </div>
-              <button class="primary-btn">Verify Payment</button>
-            </div>
-          </div>
-        </article>
-
-        <article class="transaction-card">
-          <img src="https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=600&q=80" alt="Organic Chemistry Book" class="card-img">
-          <div class="card-body">
-            <div class="card-header">
-              <h3 class="item-title">Organic Chemistry Vol 2</h3>
-              <p class="item-price">&#8358;12,500</p>
-            </div>
-            <p class="item-desc">Clean pages, no highlights. Includes supplementary DVD.</p>
-            <div class="item-location">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <span>Science Faculty</span>
-            </div>
-            <div class="card-footer">
-              <div class="status pending">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>PENDING</span>
-              </div>
-              <button class="primary-btn">Verify Payment</button>
-            </div>
-          </div>
-        </article>
-
-        <article class="transaction-card">
-          <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=600&q=80" alt="Hoodie" class="card-img">
-          <div class="card-body">
-            <div class="card-header">
-              <h3 class="item-title">Campus Varsity Hoodie</h3>
-              <p class="item-price">&#8358;18,000</p>
-            </div>
-            <p class="item-desc">Size L, Navy Blue. Brand new with tags.</p>
-            <div class="item-location">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <span>Student Union Building</span>
-            </div>
-            <div class="card-footer">
-              <div class="status pending">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>PENDING</span>
-              </div>
-              <button class="primary-btn">Verify Payment</button>
-            </div>
-          </div>
-        </article>
-
-      </div>
-
-      <div class="security-notice">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          <path d="M9 12l2 2 4-4"></path>
-        </svg>
-        <p>All items require physical verification before funds</p>
-      </div>
-
+      <section id="pending-orders-list" class="orders-list">
+        <div class="loading-state">Loading your pending orders…</div>
+      </section>
     </main>
 
-        <nav class="bottom-nav">
-        <a href="dashboard.html" class="nav-item">
-            <i class="fa-solid fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="vendor.html" class="nav-item">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <span>Catalogue</span>
-        </a>
-        <a href="transactions.html" class="nav-item active">
-            <i class="fa-solid fa-receipt"></i>
-            <span>Transactions</span>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fa-regular fa-user"></i>
-            <span>Profile</span>
-        </a>
+    <nav class="bottom-nav">
+      <a href="dashboard.html" class="nav-item">
+        <i class="fa-solid fa-house"></i>
+        <span>Home</span>
+      </a>
+      <a href="vendor.html" class="nav-item">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <span>Catalogue</span>
+      </a>
+      <a href="transactions.html" class="nav-item active">
+        <i class="fa-solid fa-receipt"></i>
+        <span>Transactions</span>
+      </a>
+      <a href="profile.html" class="nav-item">
+        <i class="fa-regular fa-user"></i>
+        <span>Profile</span>
+      </a>
     </nav>
   </div>
-  </div>
 
-  <script src="scripts/pwa.js" ></script>
+  <script type="module" src="scripts/pending.js"></script>
+  <script src="scripts/pwa.js"></script>
 </body>
 </html>
