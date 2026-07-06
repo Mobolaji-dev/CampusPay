@@ -89,20 +89,27 @@ if (loginForm) {
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Signed in
       const user = userCredential.user;
       const token = await user.getIdToken(true);
 
-      console.log("User signed in:", user);
-    
       localStorage.setItem('token', token);
       localStorage.setItem('uid', user.uid);
 
-      // Pass displayName on login so the backend can correct a fallback name
-      await syncWithBackend(token, user.uid, user.displayName || null, 'student');
+      // Pass displayName on login so the backend can correct a fallback name.
+      // Role is intentionally omitted here — for existing users, get_or_create_user
+      // always returns the role they registered with, ignoring the sent role.
+      const data = await syncWithBackend(token, user.uid, user.displayName || null, 'student');
 
       loginbtn.classList.remove('loading');
-      window.location.href = "dashboard.html";
+
+      // Store vendor-specific fields so dashboard pages don't need extra fetches
+      if (data.role === 'Vendor') {
+        localStorage.setItem('vendorId', data.user_id);
+        localStorage.setItem('vendorName', data.full_name);
+        window.location.href = "vendor-dashboard.html";
+      } else {
+        window.location.href = "dashboard.html";
+      }
     }
       catch(err) {
       console.error("Error signing in:", err.code, err.message);
