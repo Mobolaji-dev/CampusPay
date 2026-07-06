@@ -4,7 +4,7 @@ import re
 
 class AuthSyncRequest(BaseModel):
     full_name: str | None = None
-    role: str = "student"
+    role: str | None = None   # None on login (existing user) — required on signup
     phone: str | None = None
 
     @field_validator("full_name")
