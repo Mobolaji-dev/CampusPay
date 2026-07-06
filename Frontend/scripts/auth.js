@@ -46,23 +46,37 @@ export function getUid() {
 
 
 
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:8000'
-  : 'https://campuspay.pxxl.run';
+export const API_BASE_URL = (() => {
+  const hostname = window.location.hostname;
+  if (
+    !hostname ||
+    hostname === 'localhost' || 
+    hostname === '127.0.0.1' || 
+    hostname.startsWith('192.168.') || 
+    hostname.startsWith('172.') || 
+    hostname.startsWith('10.')
+  ) {
+    return hostname && hostname !== 'localhost' && hostname !== '127.0.0.1'
+      ? `http://${hostname}:3000`
+      : 'http://localhost:3000';
+  }
+  return 'https://campuspay.pxxl.run';
+})();
 
-async function syncWithBackend(token, uid, fullName = null, role = 'student', phoneNo) {
+async function syncWithBackend(token, uid, fullName = null, role = null, phoneNo) {
   try {
+    // Build body: only include role when it's explicitly provided (signup flow).
+    // On login we leave it out so the backend never mis-creates a vendor as student.
+    const body = { full_name: fullName, phone: phoneNo };
+    if (role !== null) body.role = role;
+
     const response = await fetch(`${API_BASE_URL}/auth/sync`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({
-        full_name: fullName,
-        role: role,
-        phone: phoneNo,
-      })
+      body: JSON.stringify(body)
     });
     if (!response.ok) {
       const errText = await response.text();
@@ -98,7 +112,10 @@ if (loginForm) {
       // Pass displayName on login so the backend can correct a fallback name.
       // Role is intentionally omitted here — for existing users, get_or_create_user
       // always returns the role they registered with, ignoring the sent role.
-      const data = await syncWithBackend(token, user.uid, user.displayName || null, 'student');
+      // role is intentionally omitted on login — the backend returns the stored role.
+      // Passing 'student' here previously risked creating a vendor as a Student if their
+      // DB row was absent (e.g. after a DB reset).
+      const data = await syncWithBackend(token, user.uid, user.displayName || null);
 
       loginbtn.classList.remove('loading');
 

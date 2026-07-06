@@ -55,7 +55,13 @@ async def get_or_create_user(
             "available_balance": str(wallet.available_balance) if wallet else "0.00",
         }
 
-    # Validate role
+    # Validate role — required only when creating a new user (signup flow).
+    # On login, role_str will be None for existing users; we never reach here for them.
+    if not role_str:
+        raise ValueError(
+            "Role is required when registering. "
+            "If you already have an account, please log in instead."
+        )
     try:
         app_role = approles[role_str.capitalize()]
     except KeyError:
