@@ -124,3 +124,43 @@ async def transfer_to_bank(amount:Decimal,
             "narration":narration,
     }
     )
+
+
+
+_banks_cache: list[dict] | None = None
+_banks_cache_expires_at: datetime | None = None
+
+
+async def fetch_banks() -> list[dict]:
+    """Return all supported Nigerian banks from Nomba, using an in-process cache."""
+    global _banks_cache, _banks_cache_expires_at
+
+    if (
+        _banks_cache is not None
+        and _banks_cache_expires_at is not None
+        and datetime.now(timezone.utc) < _banks_cache_expires_at
+    ):
+        return _banks_cache
+
+    result = await nomba_api_request(method="GET", endpoint="/v1/transfers/banks")
+
+    if result.get("code") != "00":
+        raise Exception(f"Failed to fetch bank list: {result}")
+
+    banks: list[dict] = result.get("data", {}).get("banks") or result.get("data", [])
+    _banks_cache = banks
+    _banks_cache_expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    return banks
+
+
+async def lookup_account(account_number: str, bank_code: str) -> dict:
+    """Resolve an account number to an account name via Nomba's lookup endpoint."""
+    result = await nomba_api_request(
+        method="POST",
+        endpoint="/v1/transfers/banks/lookup",
+        payload={
+            "accountNumber": account_number,
+            "bankCode": bank_code,
+        },
+    )
+    return result

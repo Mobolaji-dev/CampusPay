@@ -13,7 +13,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import get_current_firebase_user
 from app.models.models import users, wallets, orders, orderstat
-from app.schemas.orders import PlaceOrderRequest, PlaceOrderResponse, ScanQRRequest, PendingTransactionItem
+from app.schemas.orders import PlaceOrderRequest, PlaceOrderResponse, ScanQRRequest, PendingTransactionItem, VendorPendingOrderItem
 from app.services.nomba import transfer_to_bank
 
 logger = logging.getLogger(__name__)
@@ -374,3 +374,73 @@ async def get_pending_transactions(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+@router.get("/vendor/pending", response_model=list[VendorPendingOrderItem])
+async def get_vendor_pending_orders(
+    firebase_user: dict = Depends(get_current_firebase_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return all pending orders for the authenticated vendor, including the buyer's name."""
+    try:
+        from app.models.models import approles
+        from sqlalchemy.orm import aliased
+
+        firebase_uid = firebase_user.get("uid")
+        if not firebase_uid:
+            raise HTTPException(status_code=401, detail="Invalid Firebase token")
+
+        user_result = await db.execute(
+            select(users).where(users.firebase_uid == firebase_uid)
+        )
+        current_user = user_result.scalar_one_or_none()
+        if not current_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if current_user.role != approles.Vendor:
+            raise HTTPException(status_code=403, detail="Vendor access required")
+
+        student_alias = aliased(users)
+        stmt = (
+            select(
+                orders.order_id,
+                orders.item_description,
+                orders.item_amount,
+                orders.escrow_hold,
+                orders.order_status,
+                orders.created_at,
+                student_alias.full_name.label("student_name"),
+            )
+            .join(student_alias, student_alias.user_id == orders.student_id)
+            .where(
+                orders.vendor_id == current_user.user_id,
+                orders.order_status == orderstat.pending,
+            )
+            .order_by(orders.created_at.desc())
+        )
+
+        result = await db.execute(stmt)
+        rows = result.fetchall()
+
+        items = []
+        for row in rows:
+            created_at_utc = row.created_at
+            if created_at_utc.tzinfo is None:
+                from datetime import timezone
+                created_at_utc = created_at_utc.replace(tzinfo=timezone.utc)
+            items.append(
+                VendorPendingOrderItem(
+                    order_id=row.order_id,
+                    item_description=row.item_description,
+                    item_amount=str(row.item_amount),
+                    escrow_hold=str(row.escrow_hold),
+                    student_name=row.student_name,
+                    created_at=created_at_utc.isoformat().replace("+00:00", "Z"),
+                    order_status=row.order_status.value,
+                )
+            )
+        return items
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(e)
+        raise HTTPException(status_code=500, detail="Internal server error")

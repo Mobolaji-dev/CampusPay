@@ -47,3 +47,13 @@ class PendingTransactionItem(BaseModel):
     qr_token: str
     created_at: str
 
+
+class VendorPendingOrderItem(BaseModel):
+    order_id: str
+    item_description: str
+    item_amount: str
+    escrow_hold: str
+    student_name: str
+    created_at: str
+    order_status: str
+
