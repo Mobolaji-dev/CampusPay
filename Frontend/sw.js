@@ -1,4 +1,4 @@
-const CACHE_NAME = 'campuspay-v1';
+const CACHE_NAME = 'campuspay-v1.1';
 const PRECACHE_URLS = [
   '/', '/index.html', '/signup.html', '/dashboard.html', '/vendor.html', '/catalogue.html', '/purchase.html','/success.html','/pending.html','/profile.html','/pin.html', '/receipt.html', '/transactions.html',
 

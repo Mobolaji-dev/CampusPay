@@ -33,8 +33,12 @@ function getStatusClass(status) {
 
 function normalizeDirection(direction) {
   const normalized = String(direction || '').toLowerCase().trim();
-  if (normalized === 'in' || normalized === 'credit') return 'in';
-  if (normalized === 'out' || normalized === 'debit') return 'out';
+  const words = normalized.match(/\b\w+\b/g) || [];
+  const inKeywords = ['in', 'credit', 'deposit', 'received', 'fund', 'funding', 'income'];
+  const outKeywords = ['out', 'debit', 'withdrawal', 'paid', 'payment', 'spent', 'expense', 'transfer'];
+
+  if (words.some(word => inKeywords.includes(word))) return 'in';
+  if (words.some(word => outKeywords.includes(word))) return 'out';
   return 'out';
 }
 
@@ -121,7 +125,7 @@ function renderTransactions(transactions, filter = 'all') {
   const list = document.getElementById('transaction-list');
   const filtered = transactions.filter(item => {
     if (filter === 'all') return true;
-    return String(item.direction || '').toLowerCase() === filter;
+    return normalizeDirection(item.direction) === filter;
   });
 
   if (!filtered.length) {
