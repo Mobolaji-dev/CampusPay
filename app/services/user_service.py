@@ -13,6 +13,7 @@ async def get_or_create_user(
     email: str,
     full_name: str,
     role_str: str,
+    phone: str | None = None,
 ) -> dict:
     # Check existing
     result = await db.execute(
@@ -21,12 +22,19 @@ async def get_or_create_user(
     db_user = result.scalar_one_or_none()
 
     if db_user:
-        # Update full_name if a real name is provided and the stored one is missing or a fallback
-        FALLBACK_NAMES = {"CampusPay User", None, ""}
+        # Update full_name if a real name is provided and the stored one is a fallback
+        FALLBACK_NAMES = {"CampusPay User", "New User", None, ""}
+        updated = False
         if full_name and db_user.full_name in FALLBACK_NAMES:
             db_user.full_name = full_name
-            await db.commit()
             logger.info(f"Updated full_name for user {db_user.user_id} to '{full_name}'")
+            updated = True
+        if phone and not db_user.phone:
+            db_user.phone = phone
+            logger.info(f"Updated phone for user {db_user.user_id}")
+            updated = True
+        if updated:
+            await db.commit()
 
         wallet_result = await db.execute(
             select(wallets).where(wallets.user_id == db_user.user_id)
@@ -59,6 +67,7 @@ async def get_or_create_user(
         role=app_role,
         full_name=full_name or "CampusPay User",
         email=email,
+        phone=phone,
     )
     db.add(new_user)
     await db.flush()
@@ -99,7 +108,14 @@ async def get_or_create_user(
             response_data["bank_account_number"] = va_data.get("bankAccountNumber")
             response_data["bank_name"] = va_data.get("bankName")
         else:
-            logger.error(f"VA creation failed for {new_user.user_id}: {va_response}")
+            description = va_response.get("description", "")
+            if "sandbox" in description.lower() or "2 sandbox" in description.lower():
+                logger.warning(
+                    f"Sandbox DVA cap reached for {new_user.user_id}: {description}. "
+                    "User created without a bank account — expected in sandbox mode."
+                )
+            else:
+                logger.error(f"VA creation failed for {new_user.user_id}: {va_response}")
 
     await db.commit()
     return response_data
