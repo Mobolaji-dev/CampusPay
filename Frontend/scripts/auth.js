@@ -60,6 +60,9 @@ export const API_BASE_URL = (() => {
       ? `http://${hostname}:3000`
       : 'http://localhost:3000';
   }
+  if (hostname === 'campuspay-3f39.onrender.com') {
+    return 'https://campuspay-3f39.onrender.com';
+  }
   return 'https://campuspay.pxxl.run';
 })();
 
