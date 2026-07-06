@@ -137,7 +137,7 @@ async function loadTransactions() {
   renderEmptyState('Loading your transaction history…');
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/transactions`, {
+    const response = await fetch(`${API_BASE_URL}/api/wallet/transactions`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
