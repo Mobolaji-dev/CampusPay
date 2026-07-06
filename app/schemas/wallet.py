@@ -9,3 +9,12 @@ class WalletResponse(BaseModel):
     locked_balance: str
     bank_account_number: str | None = None
     bank_name: str | None = None
+
+
+class TransactionItem(BaseModel):
+    type: str  
+    description: str
+    amount: str
+    direction: str  
+    status: str
+    created_at: str  
