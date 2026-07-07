@@ -167,3 +167,16 @@ async def fetch_banks() -> list[dict]:
     _banks_cache_expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
 
     return banks
+
+
+async def lookup_account(account_number: str, bank_code: str) -> dict:
+    """Resolve an account number via Nomba."""
+    result = await nomba_api_request(
+        method="POST",
+        endpoint="/v1/transfers/banks/lookup",
+        payload={
+            "accountNumber": account_number,
+            "bankCode": bank_code,
+        },
+    )
+    return result
