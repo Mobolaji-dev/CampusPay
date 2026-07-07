@@ -48,8 +48,7 @@ function loadReceipt() {
   receiptStatus.textContent = order.status ? order.status.toUpperCase() : 'SUCCESS';
 
   const qrData = encodeURIComponent(order.qr_token || order.order_id || '');
-  qrCode.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${qrData}`;
-}
+  qrCode.src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${qrData}`;}
 
 document.addEventListener('DOMContentLoaded', () => {
   const cancelButton = document.getElementById('cancel-button');

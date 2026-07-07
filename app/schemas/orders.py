@@ -45,6 +45,10 @@ class PendingTransactionItem(BaseModel):
     image_url: str | None = None
     status: str = "pending"
     qr_token: str
+    vendor_id: str
+    vendor_name: str | None = None
+    total_charged: str
+    timer_expire_at: str
     created_at: str
 
 

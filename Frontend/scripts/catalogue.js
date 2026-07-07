@@ -11,7 +11,7 @@ function currency(n) {
 	return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(n);
 }
 
-function saveCheckoutItem(product, vendor) {
+function save(product, vendor) {
 	const payload = {
 		vendor_id: vendor.vendor_id,
 		vendor_name: vendor.name,
@@ -19,7 +19,7 @@ function saveCheckoutItem(product, vendor) {
 		description: product.description || 'Purchase from ' + vendor.name,
 		price: Number(product.price || 0),
 	};
-	window.sessionStorage.setItem('checkoutItem', JSON.stringify(payload));
+	window.koutItem', JSON.stringify(payload));
 	window.location.href = 'purchase.html';
 }
 

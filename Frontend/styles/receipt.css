@@ -119,9 +119,10 @@ body {
 }
 
 .qr-img {
-  width: 120px;
-  height: 120px;
-  display: block;
+  image-rendering: pixelated; /* stops blur when the browser scales it */
+  width: 100%;
+  max-width: 260px;
+  height: auto;
 }
 
 .qr-title {

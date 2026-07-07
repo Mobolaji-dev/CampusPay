@@ -108,7 +108,7 @@ async function submitPayment(event) {
       total_charged: result.total_charged ?? totalAmount,
       order_id: result.order_id,
       qr_token: result.qr_token,
-      timer_expire_at: result.timer_expire_at,
+      timer_expire_at: result.timer_expires_at,
       status: result.status || 'SUCCESS',
     };
 
