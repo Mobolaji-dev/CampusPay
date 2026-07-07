@@ -1,6 +1,29 @@
 // existing placeholder
 
 import { getToken, API_BASE_URL} from './auth.js';
+import { firestore } from './firebaseAuth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+
+async function loadFirestoreImage(firestoreUrl, imgEl) {
+	try {
+		const [collectionName, docId] = firestoreUrl.replace('firestore://', '').split('/');
+		if (!collectionName || !docId) {
+			throw new Error('Invalid Firestore image URL');
+		}
+		const docRef = doc(firestore, collectionName, docId);
+		const snapshot = await getDoc(docRef);
+		if (!snapshot.exists()) {
+			throw new Error('Firestore image document does not exist');
+		}
+		const data = snapshot.data();
+		if (!data || !data.contentType || !data.base64) {
+			throw new Error('Invalid Firestore image document');
+		}
+		imgEl.src = `data:${data.contentType};base64,${data.base64}`;
+	} catch (err) {
+		console.error('Failed to load Firestore image:', err);
+	}
+}
 
 function qS(param) {
 	const url = new URL(window.location.href);
@@ -11,7 +34,7 @@ function currency(n) {
 	return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(n);
 }
 
-function save(product, vendor) {
+function saveCheckoutItem(product, vendor) {
 	const payload = {
 		vendor_id: vendor.vendor_id,
 		vendor_name: vendor.name,
@@ -19,7 +42,7 @@ function save(product, vendor) {
 		description: product.description || 'Purchase from ' + vendor.name,
 		price: Number(product.price || 0),
 	};
-	window.koutItem', JSON.stringify(payload));
+	window.sessionStorage.setItem('checkoutItem', JSON.stringify(payload));
 	window.location.href = 'purchase.html';
 }
 
@@ -30,8 +53,17 @@ function createProductCard(product, vendor) {
 	const imgWrap = document.createElement('div');
 	imgWrap.className = 'card-image_container card-image-container';
 	const img = document.createElement('img');
-	img.src = vendor.cover_image_url || 'assets/product-placeholder.jpg';
 	img.alt = product.name;
+
+	const isFirestoreImage = typeof product.image_url === 'string' && product.image_url.startsWith('firestore://');
+	if (isFirestoreImage) {
+		img.src = 'assets/product-placeholder.jpg';
+		loadFirestoreImage(product.image_url, img);
+	} else if (product.image_url) {
+		img.src = product.image_url;
+	} else {
+		img.src = vendor.cover_image_url || 'assets/product-placeholder.jpg';
+	}
 	imgWrap.appendChild(img);
 
 	const content = document.createElement('div');
