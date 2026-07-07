@@ -204,73 +204,86 @@ function escAttr(str) {
 }
 
 // ── Scanner ───────────────────────────────────────────────────────────────────
-function openScanner(orderId) {
+async function openScanner(orderId) {
   currentOrderId = orderId;
-  manualInput.value = '';
-  scanStatus.className = 'scan-status hidden';
-  scanStatus.textContent = '';
-  qrModal.classList.add('open');
 
-  html5QrCode = new Html5Qrcode('qr-reader');
+  manualInput.value = "";
+  scanStatus.className = "scan-status hidden";
+  scanStatus.textContent = "";
+
+  qrReader.innerHTML = "";
+  qrModal.classList.add("open");
+
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("qr-reader");
+  }
 
   const config = {
     fps: 10,
-    qrbox: (viewfinderWidth, viewfinderHeight) => {
-      const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-      const boxSize = Math.floor(minEdge * 0.7);
-      return { width: boxSize, height: boxSize };
-    },
-    videoConstraints: {
-      facingMode: { ideal: 'environment' },
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-    },
+    qrbox: { width: 260, height: 260 },
+    aspectRatio: 1.0
   };
 
-  const onScanSuccess = (decodedText) => {
+  const onScanSuccess = async (decodedText) => {
     if (!scannerActive) return;
     scannerActive = false;
-    stopCamera();
+
+    await stopCamera();
     handleScan(decodedText);
   };
 
-  const onScanFailure = (errorMessage) => {
-    console.log('scan miss:', errorMessage); 
+  const onScanFailure = () => {};
 
-  html5QrCode
-    .start({ facingMode: 'environment' }, config, onScanSuccess, onScanFailure)
-    .then(() => {
+  try {
+    await html5QrCode.start(
+      { facingMode: "environment" },
+      config,
+      onScanSuccess,
+      onScanFailure
+    );
+    scannerActive = true;
+  } catch (err) {
+    console.error(err);
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras.length) {
+        throw new Error("No camera");
+      }
+      await html5QrCode.start(
+        cameras[0].id,
+        config,
+        onScanSuccess,
+        onScanFailure
+      );
       scannerActive = true;
-      try {
-        console.log('Active camera settings:', html5QrCode.getRunningTrackSettings());
-      } catch {}
-    })
-    .catch((err) => {
-      console.error('html5-qrcode start (facingMode) failed:', err);
-      Html5Qrcode.getCameras()
-        .then((cameras) => {
-          if (!cameras || cameras.length === 0) {
-            showScanStatus('No camera found. Use the manual input below.', 'error');
-            return;
-          }
-          const cameraId = cameras[0].id;
-          return html5QrCode
-            .start(cameraId, config, onScanSuccess, onScanFailure)
-            .then(() => { scannerActive = true; });
-        })
-        .catch((err2) => {
-          console.error('html5-qrcode getCameras fallback failed:', err2);
-          showScanStatus('Camera unavailable. Use the manual input below.', 'error');
-        });
-    });
-}}
+    } catch (e) {
+      console.error(e);
+      showScanStatus("Unable to access camera. Use manual QR entry.", "error");
+    }
+  }
+}
 
-function closeScanner() {
-  stopCamera();
-  qrModal.classList.remove('open');
+async function stopCamera() {
+  if (!html5QrCode) return;
+
+  try {
+    if (scannerActive) {
+      await html5QrCode.stop();
+    }
+    await html5QrCode.clear();
+  } catch (e) {
+    console.error(e);
+  }
+
+  scannerActive = false;
+  html5QrCode = null;
+  qrReader.innerHTML = "";
+}
+
+async function closeScanner() {
+  await stopCamera();
+  qrModal.classList.remove("open");
   currentOrderId = null;
-  // Clear the QR reader DOM so it re-initialises cleanly next time
-  qrReader.innerHTML = '';
 }
 
 // ── handleScan ─────────────────────────────────────────────────────────────────
