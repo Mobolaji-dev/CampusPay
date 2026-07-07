@@ -84,7 +84,7 @@ async def place_order(
         expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
 
         qr_payload = {
-            "order_id": None,  
+            "order_id": None,
             "vendor_id": body.vendor_id,
             "exp": int(expires_at.timestamp()),
         }
@@ -96,7 +96,7 @@ async def place_order(
             item_amount=body.item_amount,
             escrow_hold=total_charge,
             order_status=orderstat.pending,
-            qr_token="pending",          
+            qr_token="pending",
             timer_expires_at=expires_at,
         )
         db.add(new_order)
@@ -130,9 +130,6 @@ async def place_order(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-
-
-
 @router.post("/{order_id}/scan", status_code=200)
 async def scan_order_qr(
     order_id: str,
@@ -155,7 +152,7 @@ async def scan_order_qr(
     if token_order_id != order_id:
         raise HTTPException(status_code=401, detail="QR token does not match this order")
 
-    # Identify the scanning vendor 
+    # Identify the scanning vendor
     firebase_uid = firebase_user.get("uid")
     vendor_result = await db.execute(
         select(users).where(users.firebase_uid == firebase_uid)
@@ -184,7 +181,7 @@ async def scan_order_qr(
     if token_vendor_id != vendor.user_id:
         raise HTTPException(status_code=403, detail="This QR code is not for your store")
 
-    #  Load student wallet 
+    #  Load student wallet
     wallet_result = await db.execute(
         select(wallets).where(wallets.user_id == order.student_id)
     )
@@ -192,12 +189,11 @@ async def scan_order_qr(
 
     if not wallet:
         raise HTTPException(status_code=404, detail="Student wallet not found")
-    
+
     if not vendor.vendor_bank_account or not vendor.vendor_bank_code:
         raise HTTPException(status_code=422,
                             detail="Vendor has not set up bank account details for payouts"
                             )
-
 
     # ── PHASE 1: Release escrow + mark confirmed — commit before Nomba ─
     # locked_balance decreases; available_balance stays the same (money left the system)
@@ -230,7 +226,7 @@ async def scan_order_qr(
             narration=f"Payment for order {order_id[:8]} — {order.item_description[:40]}",
             merchantTxRef=order_id,              # idempotency key — safe to retry
         )
-        
+
         if nomba_result.get("code") == "00":
             nomba_ref = nomba_result.get("data", {}).get("transferRef") or order_id
             logger.info(f"Nomba transfer succeeded: order={order_id}, ref={nomba_ref}")
@@ -301,12 +297,16 @@ async def get_pending_transactions(
                     vendor_alias.vendor_location.label("location"),
                     vendor_alias.vendor_cover_image_url.label("image_url"),
                     orders.qr_token,
-                    orders.created_at
+                    orders.created_at,
+                    vendor_alias.user_id.label("vendor_id"),
+                    vendor_alias.full_name.label("vendor_name"),
+                    orders.escrow_hold.label("total_charged"),
+                    orders.timer_expires_at.label("timer_expire_at"),
                 )
                 .join(vendor_alias, vendor_alias.user_id == orders.vendor_id)
                 .outerjoin(
                     ProductsModel,
-                    (ProductsModel.vendor_id == orders.vendor_id) & 
+                    (ProductsModel.vendor_id == orders.vendor_id) &
                     (ProductsModel.name == orders.item_description)
                 )
                 .where(
@@ -325,12 +325,17 @@ async def get_pending_transactions(
                     student_alias.vendor_location.label("location"),
                     student_alias.vendor_cover_image_url.label("image_url"),
                     orders.qr_token,
-                    orders.created_at
+                    orders.created_at,
+                    orders.vendor_id.label("vendor_id"),
+                    vendor_alias.full_name.label("vendor_name"),
+                    orders.escrow_hold.label("total_charged"),
+                    orders.timer_expires_at.label("timer_expire_at"),
                 )
                 .join(student_alias, student_alias.user_id == orders.student_id)
+                .join(vendor_alias, vendor_alias.user_id == orders.vendor_id)
                 .outerjoin(
                     ProductsModel,
-                    (ProductsModel.vendor_id == orders.vendor_id) & 
+                    (ProductsModel.vendor_id == orders.vendor_id) &
                     (ProductsModel.name == orders.item_description)
                 )
                 .where(
@@ -352,6 +357,11 @@ async def get_pending_transactions(
                 created_at_utc = created_at_utc.replace(tzinfo=timezone.utc)
             created_at_str = created_at_utc.isoformat().replace("+00:00", "Z")
 
+            timer_expire_utc = row.timer_expire_at
+            if timer_expire_utc is not None and timer_expire_utc.tzinfo is None:
+                timer_expire_utc = timer_expire_utc.replace(tzinfo=timezone.utc)
+            timer_expire_str = timer_expire_utc.isoformat().replace("+00:00", "Z") if timer_expire_utc else None
+
             items.append(
                 PendingTransactionItem(
                     order_id=row.order_id,
@@ -362,7 +372,11 @@ async def get_pending_transactions(
                     image_url=row.image_url,
                     status="pending",
                     qr_token=row.qr_token,
-                    created_at=created_at_str
+                    created_at=created_at_str,
+                    vendor_id=row.vendor_id,
+                    vendor_name=row.vendor_name,
+                    total_charged=str(row.total_charged),
+                    timer_expire_at=timer_expire_str,
                 )
             )
         return items
