@@ -211,39 +211,62 @@ function openScanner(orderId) {
   scanStatus.textContent = '';
   qrModal.classList.add('open');
 
-  // Start html5-qrcode
   html5QrCode = new Html5Qrcode('qr-reader');
-  Html5Qrcode.getCameras()
-    .then(cameras => {
-      if (!cameras || cameras.length === 0) return; // fallback only
-      const cameraId = cameras[cameras.length - 1].id; // prefer back camera
-      html5QrCode.start(
-        cameraId,
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        (decodedText) => {
-          if (!scannerActive) return;
-          scannerActive = false;
-          stopCamera();
-          handleScan(decodedText);
-        },
-        () => {} // ignore scan errors (frame by frame noise)
-      ).then(() => { scannerActive = true; })
-       .catch(() => {
-         // Camera failed — user must use fallback
-         showScanStatus('Camera unavailable. Use the manual input below.', 'error');
-       });
-    })
-    .catch(() => {
-      showScanStatus('Camera permission denied. Use the manual input below.', 'error');
-    });
-}
 
-function stopCamera() {
-  if (html5QrCode) {
-    html5QrCode.stop().catch(() => {});
-    html5QrCode = null;
-  }
-  scannerActive = false;
+  const config = {
+    fps: 10,
+    qrbox: { width: 220, height: 220 },
+    videoConstraints: {
+      facingMode: { ideal: 'environment' },
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+    },
+  };
+
+  html5QrCode
+    .start(
+      { facingMode: 'environment' },
+      config,
+      (decodedText) => {
+        if (!scannerActive) return;
+        scannerActive = false;
+        stopCamera();
+        handleScan(decodedText);
+      },
+      () => {} // per-frame scan noise, ignore
+    )
+    .then(() => {
+      scannerActive = true;
+    })
+    .catch((err) => {
+      console.error('html5-qrcode start (facingMode) failed:', err);
+      // Fallback: enumerate devices explicitly (helps on desktops/odd browsers)
+      Html5Qrcode.getCameras()
+        .then((cameras) => {
+          if (!cameras || cameras.length === 0) {
+            showScanStatus('No camera found. Use the manual input below.', 'error');
+            return;
+          }
+          const cameraId = cameras[0].id; // just use first available as fallback
+          return html5QrCode
+            .start(
+              cameraId,
+              config,
+              (decodedText) => {
+                if (!scannerActive) return;
+                scannerActive = false;
+                stopCamera();
+                handleScan(decodedText);
+              },
+              () => {}
+            )
+            .then(() => { scannerActive = true; });
+        })
+        .catch((err2) => {
+          console.error('html5-qrcode getCameras fallback failed:', err2);
+          showScanStatus('Camera unavailable. Use the manual input below.', 'error');
+        });
+    });
 }
 
 function closeScanner() {
