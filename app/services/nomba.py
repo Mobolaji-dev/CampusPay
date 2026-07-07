@@ -3,6 +3,10 @@ from app.core.config import settings
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from decimal import Decimal
+import logging
+
+
+logger=logging.getLogger(__name__)
 
 
 async def fetch_access_token() -> dict:
