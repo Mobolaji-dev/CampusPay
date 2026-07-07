@@ -287,7 +287,7 @@ sequenceDiagram
     
     rect rgb(230, 245, 230)
         Backend->>DB: Release escrow: deduct Item Amount, refund N20 platform fee to student
-        Backend->>DB: Write credit ledger for N20 refund; Mark Order as Confirmed
+        Backend->>DB: Write credit ledger for N20 refund, and mark Order as Confirmed
         Backend->>DB: Commit DB Transaction (Ensures double-spend prevention)
     end
     
@@ -344,7 +344,9 @@ sequenceDiagram
    
 2. **Nomba Webhook Signature Verification**:
    To prevent spoofing attacks, incoming webhook payloads are validated. The API reads headers (`nomba-signature` and `nomba-timestamp`), computes an HMAC signature using SHA256 over the raw request body, and compares it to the header signature:
-   $$\text{HMAC-SHA256}(\text{timestamp} + \text{raw\_body}, \text{WEBHOOK\_SECRET})$$
+   ```
+   HMAC-SHA256(timestamp + raw_body, WEBHOOK_SECRET)
+   ```
 
 3. **Secure Offline QR Authentication**:
    The QR code contains a JSON Web Token (JWT) signed by the backend's secret key using the HMAC-SHA256 algorithm. The token contains the unique order ID, vendor ID, and expiration timestamp. When a vendor scans the code, the backend verifies the signature and validates that it hasn't expired. Since the QR is dynamically verified, it cannot be tampered with by students.
