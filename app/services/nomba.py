@@ -177,7 +177,7 @@ async def lookup_account(account_number: str, bank_code: str) -> dict:
     """Resolve an account number via Nomba."""
     result = await nomba_api_request(
         method="POST",
-        endpoint="/v1/transfers/banks/lookup",
+        endpoint="/v1/transfers/bank/lookup",
         payload={
             "accountNumber": account_number,
             "bankCode": bank_code,
