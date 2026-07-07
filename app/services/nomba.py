@@ -179,4 +179,7 @@ async def lookup_account(account_number: str, bank_code: str) -> dict:
             "bankCode": bank_code,
         },
     )
+
+    logger.info("ACCOUNT LOOKUP RESPONSE: %s", result)
+
     return result
