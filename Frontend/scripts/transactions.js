@@ -29,6 +29,9 @@ function getStatusClass(status) {
 
 function normalizeDirection(direction) {
   const normalized = String(direction || '').toLowerCase().trim();
+  if (normalized === '+' || normalized === 'in' || normalized === 'credit' || normalized === 'deposit') return 'in';
+  if (normalized === '-' || normalized === 'out' || normalized === 'debit' || normalized === 'withdrawal') return 'out';
+
   const words = normalized.match(/\b\w+\b/g) || [];
   const inKeywords = ['in', 'credit', 'deposit', 'received', 'fund', 'funding', 'income'];
   const outKeywords = ['out', 'debit', 'withdrawal', 'paid', 'payment', 'spent', 'expense', 'transfer'];
