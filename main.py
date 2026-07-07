@@ -147,6 +147,7 @@ app = FastAPI(
 origins = [
     "https://campuspay-web.vercel.app",
     "https://campuspay-3f39.onrender.com",
+    "https://campuspay-eta.vercel.app",
 ]
 
 app.add_middleware(
