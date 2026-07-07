@@ -236,6 +236,8 @@ class products(Base):
 
     price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
 
+    image_url: Mapped[str | None] = mapped_column(String, nullable=True)
+
     is_available: Mapped[bool] = mapped_column(default=True)
 
     created_at: Mapped[datetime] = mapped_column(
