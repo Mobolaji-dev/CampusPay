@@ -57,8 +57,11 @@ export const API_BASE_URL = (() => {
     hostname.startsWith('10.')
   ) {
     return hostname && hostname !== 'localhost' && hostname !== '127.0.0.1'
-      ? `http://${hostname}:3000`
-      : 'http://localhost:3000';
+      ? `http://${hostname}:8000`
+      : 'http://localhost:8000';
+  }
+  if (hostname === 'campuspay-3f39.onrender.com') {
+    return 'https://campuspay-3f39.onrender.com';
   }
   return 'https://campuspay.pxxl.run';
 })();

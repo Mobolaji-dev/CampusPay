@@ -22,6 +22,7 @@ class ProductItem(BaseModel):
     description: str | None
     price: Decimal
     is_available: bool
+    image_url: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -43,6 +44,7 @@ class ProductCreateRequest(BaseModel):
     name: str
     description: str | None = None
     price: Decimal
+    image_url: str | None = None
 
     @field_validator("price")
     @classmethod
@@ -57,6 +59,7 @@ class ProductUpdateRequest(BaseModel):
     description: str | None = None
     price: Decimal | None = None
     is_available: bool | None = None
+    image_url: str | None = None
 
 
 class ProductResponse(BaseModel):
@@ -66,6 +69,7 @@ class ProductResponse(BaseModel):
     description: str | None
     price: Decimal
     is_available: bool
+    image_url: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

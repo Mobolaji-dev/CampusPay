@@ -1,6 +1,6 @@
 // existing placeholder
 
-import { getToken, API_BASE_URL } from './auth.js';
+import { getToken} from './auth.js';
 
 function qS(param) {
 	const url = new URL(window.location.href);

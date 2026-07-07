@@ -5,9 +5,11 @@ import { signOut } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-aut
 
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:8000'
+  : window.location.hostname === 'campuspay-3f39.onrender.com'
+  ? 'https://campuspay-3f39.onrender.com'
   : 'https://campuspay.pxxl.run';
 
-  
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let allBanks = [];          // [{name, code}] from Nomba
 let selectedBankCode = '';

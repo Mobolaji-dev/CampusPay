@@ -140,6 +140,7 @@ async def get_vendor(
                     description=p.description,
                     price=p.price,
                     is_available=p.is_available,
+                    image_url=p.image_url,
                 )
                 for p in product_rows
             ],
@@ -186,6 +187,7 @@ async def create_product(
             name=body.name,
             description=body.description,
             price=body.price,
+            image_url=body.image_url,
             is_available=True,
         )
         db.add(new_product)
@@ -232,6 +234,8 @@ async def update_product(
             product.description = body.description
         if body.price is not None:
             product.price = body.price
+        if body.image_url is not None:
+            product.image_url = body.image_url
         if body.is_available is not None:
             product.is_available = body.is_available
 
