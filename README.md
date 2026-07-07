@@ -428,6 +428,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. Ensure the 
 
 ## 🚦 Endpoint Documentation
 Once the backend is running, you can explore the endpoints interactively via Swagger UI:
-- **Swagger Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **Swagger Documentation**: [https://campuspay-web.vercel.app/docs](https://campuspay-web.vercel.app/docs)
 - **Reconciliation Endpoint**: `/api/admin/reconciliation` (requires Admin credentials)
 - **Service Health Check**: `/health` (returns service uptime, environment, and DB status)
