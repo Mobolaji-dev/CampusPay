@@ -2,7 +2,7 @@ import logging
 from decimal import Decimal
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models.models import users, wallets, accounts, approles
+from app.models.models import users, wallets, accounts, approles, accstatus
 from app.services.nomba import create_virtual_account
 
 logger = logging.getLogger(__name__)
@@ -15,14 +15,14 @@ async def get_or_create_user(
     role_str: str,
     phone: str | None = None,
 ) -> dict:
-    # Check existing
+   
     result = await db.execute(
         select(users).where(users.firebase_uid == firebase_uid)
     )
     db_user = result.scalar_one_or_none()
 
     if db_user:
-        # Update full_name if a real name is provided and the stored one is a fallback
+        
         FALLBACK_NAMES = {"CampusPay User", "New User", None, ""}
         updated = False
         if full_name and db_user.full_name in FALLBACK_NAMES:
@@ -55,8 +55,6 @@ async def get_or_create_user(
             "available_balance": str(wallet.available_balance) if wallet else "0.00",
         }
 
-    # Validate role — required only when creating a new user (signup flow).
-    # On login, role_str will be None for existing users; we never reach here for them.
     if not role_str:
         raise ValueError(
             "Role is required when registering. "
@@ -67,7 +65,7 @@ async def get_or_create_user(
     except KeyError:
         raise ValueError(f"Invalid role: {role_str}")
 
-    # Create user (apply fallback only here during first creation)
+    
     new_user = users(
         firebase_uid=firebase_uid,
         role=app_role,
@@ -78,7 +76,6 @@ async def get_or_create_user(
     db.add(new_user)
     await db.flush()
 
-    # Create wallet
     new_wallet = wallets(
         user_id=new_user.user_id,
         available_balance=Decimal("0.00"),
@@ -94,7 +91,6 @@ async def get_or_create_user(
         "available_balance": "0.00",
     }
 
-    # Provision DVA for students
     if app_role == approles.Student:
         account_ref = new_user.user_id
         va_response = await create_virtual_account(
@@ -108,7 +104,7 @@ async def get_or_create_user(
                 account_reference=account_ref,
                 bank_account_number=va_data.get("bankAccountNumber"),
                 bank_name=va_data.get("bankName"),
-                status="active",
+                status=accstatus.active,
             )
             db.add(new_account)
             response_data["bank_account_number"] = va_data.get("bankAccountNumber")

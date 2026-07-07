@@ -245,3 +245,44 @@ class products(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
+
+
+class wallet_ledger(Base):
+    
+    __tablename__ = "wallet_ledger"
+
+    ledger_id: Mapped[str] = mapped_column(
+        String,
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+    )
+
+    wallet_id: Mapped[str] = mapped_column(
+        String,
+        ForeignKey("wallet.wallet_id"),
+        nullable=False,
+        index=True,
+    )
+
+    user_id: Mapped[str] = mapped_column(
+        String,
+        ForeignKey("user.user_id"),
+        nullable=False,
+        index=True,
+    )
+
+    direction: Mapped[str] = mapped_column(String(6), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+
+    balance_before: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    balance_after: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+
+    reference: Mapped[str] = mapped_column(String, nullable=False)
+    order_id: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    reason: Mapped[str] = mapped_column(String, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
